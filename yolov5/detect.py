@@ -53,7 +53,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
         else:  # best class only
             print(x.shape)
             print(x[:,5:])
-            d = x[:, 5:].max(1, keepdims=True)
+            d = x[:, 5:].max(1)
             print(d)
         #     x = np.concatenate((box, conf, j.float()), 1)[conf.view(-1) > conf_thres]
 
