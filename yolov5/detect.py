@@ -42,9 +42,9 @@ def detect_image(image, interpreter, imgsz):
     time = datetime.datetime.now() - start
     outs = interpreter.get_tensor(output_index)
     shape = np.array(pimage).shape
-    outs = [np.array(outs)]
+    outs = np.array(outs)
     image = np.array(image)
-
+    process_outs(outs[0])
     print(time)
     return outs, time
 
@@ -56,7 +56,7 @@ def detect_video(video, interpreter, imgsz):
     time_array = []
     while success and count<20:
         outs, time = detect_image(Image.fromarray(image), interpreter, imgsz)
-        print(np.array(outs).shape)
+        print(outs.shape)
         time_array.append(time)
         success, image = vidcap.read()
         count += 1
