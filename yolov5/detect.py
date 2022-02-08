@@ -23,6 +23,13 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
     nc = prediction.shape[2] - 5  # number of classes
     xc = prediction[..., 4] > conf_thres  # candidates
 
+    min_wh, max_wh = 2, 4096  # (pixels) minimum and maximum box width and height
+    max_nms = 30000  # maximum number of boxes into torchvision.ops.nms()
+    time_limit = 10.0  # seconds to quit after
+    redundant = True  # require redundant detections
+    multi_label &= nc > 1  # multiple labels per box (adds 0.5ms/img)
+    merge = False  # use merge-NMS
+
     output = np.zeros((0,6))*prediction.shape[0]
     for xi, x in enumerate(prediction):  # image index, image inference
         # Apply constraints
@@ -35,37 +42,34 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
 
         # Compute conf
         x[:, 5:] *= x[:, 4:5]  # conf = obj_conf * cls_conf
-        print(type(x[:,:4]))
 
-        # # Box (center x, center y, width, height) to (x1, y1, x2, y2)
-        # box = xywh2xyxy(x[:, :4])
+        # Box (center x, center y, width, height) to (x1, y1, x2, y2)
+        box = xywh2xyxy(x[:, :4])
 
-        # # Detections matrix nx6 (xyxy, conf, cls)
-        # if multi_label:
-        #     i, j = (x[:, 5:] > conf_thres).nonzero(as_tuple=False).T
-        #     x = torch.cat((box[i], x[i, j + 5, None], j[:, None].float()), 1)
-        # else:  # best class only
-        #     conf, j = x[:, 5:].max(1, keepdim=True)
-        #     x = torch.cat((box, conf, j.float()), 1)[conf.view(-1) > conf_thres]
+        # Detections matrix nx6 (xyxy, conf, cls)
+        if multi_label:
+            i, j = (x[:, 5:] > conf_thres).nonzero(as_tuple=False).T
+            x = np.concatenate((box[i], x[i, j + 5, None], j[:, None].float()), 1)
+        else:  # best class only
+            conf, j = x[:, 5:].max(1, keepdim=True)
+            x = np.concatenate((box, conf, j.float()), 1)[conf.view(-1) > conf_thres]
 
-        # # Filter by class
-        # if classes is not None:
-        #     x = x[(x[:, 5:6] == torch.tensor(classes, device=x.device)).any(1)]
+        # Filter by class
+        if classes is not None:
+            x = x[(x[:, 5:6] == np.array(classes)).any(1)]
 
-        # # Apply finite constraint
-        # # if not torch.isfinite(x).all():
-        # #     x = x[torch.isfinite(x).all(1)]
 
-        # # Check shape
-        # n = x.shape[0]  # number of boxes
-        # if not n:  # no boxes
-        #     continue
-        # elif n > max_nms:  # excess boxes
-        #     x = x[x[:, 4].argsort(descending=True)[:max_nms]]  # sort by confidence
+        # Check shapes
+        n = x.shape[0]  # number of boxes
+        if not n:  # no boxes
+            continue
+        elif n > max_nms:  # excess boxes
+            x = x[x[:, 4].argsort(descending=True)[:max_nms]]  # sort by confidence
 
-        # # Batched NMS
-        # c = x[:, 5:6] * (0 if agnostic else max_wh)  # classes
-        # boxes, scores = x[:, :4] + c, x[:, 4]  # boxes (offset by class), scores
+        # Batched NMS
+        c = x[:, 5:6] * (0 if agnostic else max_wh)  # classes
+        boxes, scores = x[:, :4] + c, x[:, 4]  # boxes (offset by class), scores
+        print(boxes.shapeks, scores.shape)
         # print(boxes.shape, scores.shape, "999999999999999999999999999999999999")
         # i = torchvision.ops.nms(boxes, scores, iou_thres)  # NMS
         # if i.shape[0] > max_det:  # limit detections
