@@ -51,25 +51,26 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
             i, j = (x[:, 5:] > conf_thres).nonzero(as_tuple=False).T
             x = np.concatenate((box[i], x[i, j + 5, None], j[:, None].float()), 1)
         else:  # best class only
-            conf, j = x[:, 5:].max(1, keepdims=True)
-            x = np.concatenate((box, conf, j.float()), 1)[conf.view(-1) > conf_thres]
+            d = x[:, 5:].max(1, keepdims=True)
+            print(d)
+        #     x = np.concatenate((box, conf, j.float()), 1)[conf.view(-1) > conf_thres]
 
-        # Filter by class
-        if classes is not None:
-            x = x[(x[:, 5:6] == np.array(classes)).any(1)]
+        # # Filter by class
+        # if classes is not None:
+        #     x = x[(x[:, 5:6] == np.array(classes)).any(1)]
 
 
-        # Check shapes
-        n = x.shape[0]  # number of boxes
-        if not n:  # no boxes
-            continue
-        elif n > max_nms:  # excess boxes
-            x = x[x[:, 4].argsort(descending=True)[:max_nms]]  # sort by confidence
+        # # Check shapes
+        # n = x.shape[0]  # number of boxes
+        # if not n:  # no boxes
+        #     continue
+        # elif n > max_nms:  # excess boxes
+        #     x = x[x[:, 4].argsort(descending=True)[:max_nms]]  # sort by confidence
 
-        # Batched NMS
-        c = x[:, 5:6] * (0 if agnostic else max_wh)  # classes
-        boxes, scores = x[:, :4] + c, x[:, 4]  # boxes (offset by class), scores
-        print(boxes.shapeks, scores.shape)
+        # # Batched NMS
+        # c = x[:, 5:6] * (0 if agnostic else max_wh)  # classes
+        # boxes, scores = x[:, :4] + c, x[:, 4]  # boxes (offset by class), scores
+        # print(boxes.shapeks, scores.shape)
         # print(boxes.shape, scores.shape, "999999999999999999999999999999999999")
         # i = torchvision.ops.nms(boxes, scores, iou_thres)  # NMS
         # if i.shape[0] > max_det:  # limit detections
