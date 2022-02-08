@@ -21,6 +21,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
     print(prediction)
     nc = prediction.shape[2] - 5  # number of classes
     xc = prediction[..., 4] > conf_thres  # candidates
+    print(prediction[..., 4])
     print(nc, "THIS IS NC")
     count = 0
     for x in xc[0]:
