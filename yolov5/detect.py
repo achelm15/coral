@@ -21,8 +21,11 @@ def process_outs(prediction, conf_thres=0.25, iou_thres=0.45, classes=None, agno
     nc = prediction.shape[2] - 5  # number of classes
     xc = prediction[..., 4] > conf_thres  # candidates
     print(nc, "THIS IS NC")
+    count = 0
     for x in xc[0]:
-        print(x, "asdfasdf")
+        count = count +1
+        # print(x, "asdfasdf")
+    print(count)
     return
 
 def process_image(img, imgsz):
