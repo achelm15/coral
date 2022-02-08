@@ -84,8 +84,8 @@ def main(opt):
 
 def parse_opt():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--weights", type=str, default=ROOT / "../models/test.tflite", help="model path(s)",)
-    parser.add_argument("--source", type=str,default=ROOT / "../sources/test.jpg",)
+    parser.add_argument("--weights", type=str, default=ROOT / "./models/test.tflite", help="model path(s)",)
+    parser.add_argument("--source", type=str,default=ROOT / "./sources/test.jpg",)
     parser.add_argument("--imgsz", type=int, default=256)
     opt = parser.parse_args()
     return opt
