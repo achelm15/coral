@@ -15,6 +15,16 @@ if str(ROOT) not in sys.path:
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 
+def process_outs(prediction, conf_thres=0.25, iou_thres=0.45, classes=None, agnostic=False, multi_label=False, labels=(), max_det=300):
+    print(prediction)
+    print("10100100101001010010010100101000101010100101010")
+    nc = prediction.shape[2] - 5  # number of classes
+    xc = prediction[..., 4] > conf_thres  # candidates
+    print(nc, "THIS IS NC")
+    for x in xc[0]:
+        print(x, "asdfasdf")
+    return
+
 def process_image(img, imgsz):
     image = np.array(img.resize((imgsz, imgsz)), dtype="int8")
     #     image /= 255.
@@ -34,6 +44,7 @@ def detect_image(image, interpreter, imgsz):
     shape = np.array(pimage).shape
     outs = [np.array(outs)]
     image = np.array(image)
+
     print(time)
     return outs, time
 
