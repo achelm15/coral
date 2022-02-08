@@ -51,7 +51,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
             i, j = (x[:, 5:] > conf_thres).nonzero(as_tuple=False).T
             x = np.concatenate((box[i], x[i, j + 5, None], j[:, None].float()), 1)
         else:  # best class only
-            conf, j = x[:, 5:].max(1, keepdim=True)
+            conf, j = x[:, 5:].max(1, keepdims=True)
             x = np.concatenate((box, conf, j.float()), 1)[conf.view(-1) > conf_thres]
 
         # Filter by class
