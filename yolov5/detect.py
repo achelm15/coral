@@ -76,9 +76,13 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     print(pred[:,4])
     print(pred[:,5])
     boxes = pred[:,:4]
+    image = cv2.imread(pathname)
+    shape = image.shape
+    width, height = shape[1], shape[0]
+    image_dims = [width, height, width, height]
+    boxes = boxes * image_dims
     scores = pred[:,4]
     classes = pred[:,5]
-    image = cv2.imread(pathname)
     if boxes is not None:
         draw(image, boxes, scores, classes, data)
     return image
