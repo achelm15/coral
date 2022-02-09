@@ -51,6 +51,7 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     for *xyxy, conf, cls in reversed(det):
         c = int(cls)  # integer class
         label = data[c]
+        print(xyxy)
         annotator.box_label(xyxy, label, color=colors(c, True))
     im0 = annotator.result()
     if True:
