@@ -84,7 +84,7 @@ def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, dat
     
     if source.endswith("jpg") or source.endswith("jpeg"):
         image = Image.open(source)
-        detect_image(image, interpreter, imgsz, source)
+        detect_image(image, interpreter, imgsz, data, source)
     elif source.endswith("m4v") or source.endswith("mp4"): 
         video = source
         detect_video(video, interpreter, imgsz, data)
