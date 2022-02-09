@@ -19,7 +19,7 @@ ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 def detect_image(image, interpreter, imgsz, data, pathname):
     pimage = process_image(image,imgsz)
-    img = np.array(image).shape
+    img = np.array(image)
     im0 = pimage.shape
     input_index = interpreter.get_input_details()[0]["index"]
     output_index = interpreter.get_output_details()[0]["index"]
