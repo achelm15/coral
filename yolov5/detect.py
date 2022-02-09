@@ -166,7 +166,8 @@ def detect_image(image, interpreter, imgsz):
     outs = [np.array(outs)]
     image = np.array(image)
     pred = process_outs(outs[0])
-    print(pred)
+    print(pred[:,5])
+
     print(time)
     return outs, time
 
