@@ -51,6 +51,7 @@ def nms(boxes, scores, threshold):
         intersections = w * h
         unions = areas[idxs[:-1]] + areas[selected_idx] - intersections
         ious = intersections / unions
+        print(ious)
 
         idxs = np.delete(
             idxs, np.concatenate(([len(idxs) - 1], np.where(ious > threshold)[0])))
