@@ -169,7 +169,13 @@ def detect_image(image, interpreter, imgsz):
     results = np.unique(pred[:,5], return_counts=True)
     print(results)
     results = ([("Class "+str(int(i))+"\'s") for i in results[0]], results[1])
-    print(results)
+    result_s = "Found: "
+    for x in range(0,len(results[0])):
+        if x != len(results[0])-1:
+            result_s+=str(int(results[1][x])) + " " + results[0][x] + ", "
+        else:
+            result_s+=str(int(results[1][x])) + " " + results[0][x]
+    print(result_s)
     
 
     print(time)
