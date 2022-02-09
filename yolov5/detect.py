@@ -110,7 +110,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
             # x = x[conf>conf_thres/100]
             # print(x)
             print(x.shape)
-            print(conf.shape)
+            print(conf)
             print(x)
             deletions = []
             for index in range(0,len(x)):
