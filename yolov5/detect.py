@@ -120,9 +120,10 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
             print(deletions)
             # for i in range(0, len(deletions)):
             #     x = np.delete(x,deletions[1]-i,0)
-            x = [x[item].tolist() for item in range(0,len(x)) if item not in deletions]
+            x = np.array([x[item].tolist() for item in range(0,len(x)) if item not in deletions])
             print("Asdfasdf")
-            print(np.array(x))
+            print(x.shape)
+            print(x)
         # # Filter by class
         # if classes is not None:
         #     x = x[(x[:, 5:6] == np.array(classes)).any(1)]
