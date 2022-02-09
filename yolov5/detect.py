@@ -59,7 +59,7 @@ def nms(boxes, scores, threshold):
 
 
 
-def process_outs(prediction, conf_thres=35, iou_thres=45, classes=None, agnostic=False, multi_label=False, labels=(), max_det=300):
+def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic=False, multi_label=False, labels=(), max_det=300):
     nc = prediction.shape[2] - 5  # number of classes
     xc = prediction[..., 4] > conf_thres  # candidates
 
@@ -108,7 +108,7 @@ def process_outs(prediction, conf_thres=35, iou_thres=45, classes=None, agnostic
             print(box)
             x = np.concatenate((box, conf, j), 1)
             print(conf>conf_thres/100)
-            print(x)
+            print(x[conf>conf_thres/100])
         # # Filter by class
         # if classes is not None:
         #     x = x[(x[:, 5:6] == np.array(classes)).any(1)]
