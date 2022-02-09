@@ -70,6 +70,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=.45, classes=None, agnosti
     multi_label &= nc > 1  # multiple labels per box (adds 0.5ms/img)
     merge = False  # use merge-NMS
     t = time.time()
+    print(prediction.shape[0])
     output = np.zeros((0,6))*prediction.shape[0]
     print(output)
     for xi, x in enumerate(prediction):  # image index, image inference
