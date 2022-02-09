@@ -16,6 +16,36 @@ if str(ROOT) not in sys.path:
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 
+def draw(image, boxes, scores, classes, all_classes):
+    """Draw the boxes on the image.
+
+    # Argument:
+        image: original image.
+        boxes: ndarray, boxes of objects.
+        classes: ndarray, classes of objects.
+        scores: ndarray, scores of objects.
+        all_classes: all classes name.
+    """
+    for box, score, cl in zip(boxes, scores, classes):
+        x, y, w, h = box
+
+        top = max(0, np.floor(x + 0.5).astype(int))
+        left = max(0, np.floor(y + 0.5).astype(int))
+        right = min(image.shape[1], np.floor(x + w + 0.5).astype(int))
+        bottom = min(image.shape[0], np.floor(y + h + 0.5).astype(int))
+
+        cv2.rectangle(image, (top, left), (right, bottom), (255, 0, 0), 2)
+        cv2.putText(image, '{0} {1:.2f}'.format(all_classes[int(cl)], score),
+                    (top, left - 6),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.6, (0, 0, 255), 1,
+                    cv2.LINE_AA)
+
+        print('class: {0}, score: {1:.2f}'.format(all_classes[cl], score))
+        print('box coordinate x,y,w,h: {0}'.format(box))
+
+    print()
+
 
 def detect_image(image, interpreter, imgsz, data, pathname):
     pimage = process_image(image,imgsz)
@@ -45,6 +75,12 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     print(pred[:,:4])
     print(pred[:,4])
     print(pred[:,5])
+    boxes = pred[:,:4]
+    scores = pred[:,4]
+    classes = pred[:,5]
+    if boxes is not None:
+        draw(image, boxes, scores, classes, data)
+    return image
     # det = pred
     # print(img.shape)
     # print(im0.shape)
@@ -66,7 +102,7 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     # if True:
     #     print("asdfas")
     #     cv2.imwrite(pathname[len(pathname)-5:]+"test.jpg", im0)
-    return outs, time
+    # return outs, time
 
 
 def detect_video(video, interpreter, imgsz, data):
@@ -97,7 +133,8 @@ def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, dat
     
     if source.endswith("jpg") or source.endswith("jpeg"):
         image = Image.open(source)
-        detect_image(image, interpreter, imgsz, data, source)
+        new_image = detect_image(image, interpreter, imgsz, data, source)
+        cv2.imwrite(source[:len(source)-5]+"test.jpg", new_image)
     elif source.endswith("m4v") or source.endswith("mp4"): 
         video = source
         detect_video(video, interpreter, imgsz, data)
