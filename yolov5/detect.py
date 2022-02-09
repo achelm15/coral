@@ -103,6 +103,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
             conf = np.array(x[:,5:]).max(1, keepdims=True)
             j = np.array([np.array(np.argmax(x[:,5:],1))]).T
             print(conf.dtype)
+            j = j.astype('float32')
             print(j.dtype)
             print(box.dtype)
             x = np.concatenate((box, conf, j), 1)[conf.view(-1) > conf_thres]
