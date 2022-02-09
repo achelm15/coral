@@ -51,7 +51,6 @@ def nms(boxes, scores, threshold):
         intersections = w * h
         unions = areas[idxs[:-1]] + areas[selected_idx] - intersections
         ious = intersections / unions
-        print(ious)
 
         idxs = np.delete(
             idxs, np.concatenate(([len(idxs) - 1], np.where(ious > threshold)[0])))
@@ -131,8 +130,10 @@ def process_outs(prediction, conf_thres=25, iou_thres=.45, classes=None, agnosti
         #     if redundant:
         #         i = i[iou.sum(1) > 1]  # require redundancy
 
+        k = [x[u] for u in i]
+        print(k)
         # output[xi] = x[i]
-        print(output)
+        # print(output)
         if (time.time() - t) > time_limit:
             print(f'WARNING: NMS time limit {time_limit}s exceeded')
             break  # time limit exceeded
