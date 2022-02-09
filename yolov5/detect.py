@@ -70,10 +70,11 @@ def detect_image(image, interpreter, imgsz, data, pathname):
             result_s+=str(int(results[1][x])) + " " + results[0][x]
     print(result_s)
     print(time)
-    pred[..., 0] *= imgsz/100  # x
-    pred[..., 1] *= imgsz/100  # y
-    pred[..., 2] *= imgsz/100  # w
-    pred[..., 3] *= imgsz/100  # h
+    
+    pred[..., 0] *= imgsz  # x
+    pred[..., 1] *= imgsz  # y
+    pred[..., 2] *= imgsz  # w
+    pred[..., 3] *= imgsz  # h
     # print(pred)
     # print(pred[:,:4])
     # print(pred[:,4])
@@ -93,25 +94,27 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     # if boxes is not None:
     #     draw(image, boxes, scores, classes, data)
     # return image
-    print(pred)
-    det = pred
-    print(img.shape)
-    print(im0.shape)
-    print(img.shape[1:3])
-    print(det)
-    print(det[:,:4])
-    det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
-    print(det)
-    annotator = Annotator(im0, line_width=3, example=str(data))
-    for *xyxy, conf, cls in reversed(det):
-        c = int(cls)  # integer class
-        label = data[c]
-        print(xyxy)
-        annotator.box_label(xyxy, label, color=colors(c, True))
-    im0 = annotator.result()
-    if True:
-        print("asdfas")
-        cv2.imwrite(pathname[len(pathname)-5:]+"test.jpg", im0)
+
+
+    # print(pred)
+    # det = pred
+    # print(img.shape)
+    # print(im0.shape)
+    # print(img.shape[1:3])
+    # print(det)
+    # print(det[:,:4])
+    # det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
+    # print(det)
+    # annotator = Annotator(im0, line_width=3, example=str(data))
+    # for *xyxy, conf, cls in reversed(det):
+    #     c = int(cls)  # integer class
+    #     label = data[c]
+    #     print(xyxy)
+    #     annotator.box_label(xyxy, label, color=colors(c, True))
+    # im0 = annotator.result()
+    # if True:
+    #     print("asdfas")
+    #     cv2.imwrite(pathname[len(pathname)-5:]+"test.jpg", im0)
     return outs, time
 
 
