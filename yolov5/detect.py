@@ -81,14 +81,9 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
             continue
 
         # Compute conf
-        print(x)
         x = x.astype('float32')
         x[:, 5:] = x[:, 5:]/100
         x[:, 4:5] = x[:, 4:5]/100
-        # print(x[:, 5:]/100*x[:, 4:5]/100)
-        # print(x[:, 5:])
-        # print(x[:, 4:5])
-        print(x)
         x[:, 5:] *= x[:, 4:5] # conf = obj_conf * cls_conf
 
         # Box (center x, center y, width, height) to (x1, y1, x2, y2)
@@ -112,6 +107,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
 
         # Filter by class
         if classes is not None:
+            print("asdf")
             x = x[(x[:, 5:6] == np.array(classes)).any(1)]
 
         print(x)
