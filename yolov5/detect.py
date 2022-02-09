@@ -70,10 +70,10 @@ def detect_image(image, interpreter, imgsz, data, pathname):
             result_s+=str(int(results[1][x])) + " " + results[0][x]
     print(result_s)
     print(time)
-    pred[..., 0] *= imgsz[1]/100  # x
-    pred[..., 1] *= imgsz[0]/100  # y
-    pred[..., 2] *= imgsz[1]/100  # w
-    pred[..., 3] *= imgsz[0]/100  # h
+    pred[..., 0] *= imgsz/100  # x
+    pred[..., 1] *= imgsz/100  # y
+    pred[..., 2] *= imgsz/100  # w
+    pred[..., 3] *= imgsz/100  # h
     # print(pred)
     # print(pred[:,:4])
     # print(pred[:,4])
