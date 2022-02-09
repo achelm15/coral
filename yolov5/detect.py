@@ -20,7 +20,7 @@ ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 def detect_image(image, interpreter, imgsz, data, pathname):
     pimage = process_image(image,imgsz)
     img = np.array(image)
-    im0 = pimage.shape
+    im0 = pimage
     input_index = interpreter.get_input_details()[0]["index"]
     output_index = interpreter.get_output_details()[0]["index"]
     interpreter.set_tensor(input_index, np.array(pimage, dtype="uint8"))
@@ -44,6 +44,9 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     print(pred)
     for i, det in enumerate(pred):
         print(i,det)
+        print(img.shape)
+        print(im0.shape)
+        print(img.shape[2:])
         det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
         annotator = Annotator(im0, line_width=3, example=str(data))
         for *xyxy, conf, cls in reversed(det):
