@@ -43,7 +43,6 @@ def detect_image(image, interpreter, imgsz, data, pathname):
 
     print(pred)
     det = pred
-    print(i,det)
     print(img.shape)
     print(im0.shape)
     print(img.shape[1:3])
