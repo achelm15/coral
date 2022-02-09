@@ -135,7 +135,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=.45, classes=None, agnosti
         k = [x[u] for u in i]
         print(k)
         print(xi)
-        output = np.array([k])
+        output = np.array(k)
         # print(output)
         if (time.time() - t) > time_limit:
             print(f'WARNING: NMS time limit {time_limit}s exceeded')
