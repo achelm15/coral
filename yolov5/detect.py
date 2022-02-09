@@ -125,7 +125,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
         i = nms(boxes, scores, iou_thres)  # NMS
         if np.array(i).shape[0] > max_det:  # limit detections
             i = i[:max_det]
-        print(i)
+        print(sorted(i))
         # if merge and (1 < n < 3E3):  # Merge NMS (boxes merged using weighted mean)
         #     # update boxes as boxes(i,4) = weights(i,n) * boxes(n,4)
         #     iou = box_iou(boxes[i], boxes) > iou_thres  # iou matrix
