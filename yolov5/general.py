@@ -227,7 +227,9 @@ def xyxy2xywh(x):
     return y
 
 def process_image(img, imgsz):
+    print(img.shape)
     image = np.array(img.resize((imgsz, imgsz)), dtype="int8")
+    print(image.shape)
     #     image /= 255.
     image = np.expand_dims(image, axis=0)
     return image
