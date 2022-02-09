@@ -70,9 +70,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=.45, classes=None, agnosti
     multi_label &= nc > 1  # multiple labels per box (adds 0.5ms/img)
     merge = False  # use merge-NMS
     t = time.time()
-    print(prediction.shape[0])
     output = np.zeros((0,6))*prediction.shape[0]
-    print(output)
     for xi, x in enumerate(prediction):  # image index, image inference
         # Apply constraints
         # x[((x[..., 2:4] < min_wh) | (x[..., 2:4] > max_wh)).any(1), 4] = 0  # width-height
@@ -131,16 +129,11 @@ def process_outs(prediction, conf_thres=25, iou_thres=.45, classes=None, agnosti
         #     x[i, :4] = torch.mm(weights, x[:, :4]).float() / weights.sum(1, keepdim=True)  # merged boxes
         #     if redundant:
         #         i = i[iou.sum(1) > 1]  # require redundancy
-        print(output)
         k = [x[u] for u in i]
-        print(k)
-        print(xi)
         output = np.array(k)
-        # print(output)
         if (time.time() - t) > time_limit:
             print(f'WARNING: NMS time limit {time_limit}s exceeded')
             break  # time limit exceeded
-        print(output)
 
     return  output
 
@@ -173,6 +166,7 @@ def detect_image(image, interpreter, imgsz):
     outs = [np.array(outs)]
     image = np.array(image)
     pred = process_outs(outs[0])
+    print(pred)
     print(time)
     return outs, time
 
