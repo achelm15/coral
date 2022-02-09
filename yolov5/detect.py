@@ -109,12 +109,12 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
             x = np.concatenate((box, conf, j), 1)
             # x = x[conf>conf_thres/100]
             # print(x)
-            print(x.shape)
+            print(x)
             for index in range(0,len(x)):
                 print(conf[index]<conf_thres)
                 if conf[index]<conf_thres:
                     x = np.delete(x,index)
-            print(x.shape)
+            print(x)
         # # Filter by class
         # if classes is not None:
         #     x = x[(x[:, 5:6] == np.array(classes)).any(1)]
