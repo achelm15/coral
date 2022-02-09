@@ -93,8 +93,11 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
         else:  # best class only
             conf = np.array(x[:,5:]).max(1, keepdims=True)
             j = np.array([np.array(np.argmax(x[:,5:],1))]).T
+            print(conf)
+            print(j)
+            print(box)
             x = np.concatenate((box, conf, j), 1)[conf.view(-1) > conf_thres]
-            print(x)
+            # print(x)
         # # Filter by class
         # if classes is not None:
         #     x = x[(x[:, 5:6] == np.array(classes)).any(1)]
