@@ -111,11 +111,14 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
             # print(x)
             print(x.shape)
             print(conf.shape)
+            deletions = []
             for index in range(0,len(x)):
                 test = conf[index]<conf_thres
                 print(test[0])
                 if test[0]:
-                    x = np.delete(x,index,0)
+                    deletions.append(index)
+            for i in deletions:
+                np.delete(x,i,0)
             print("Asdfasdf")
             print(x)
         # # Filter by class
