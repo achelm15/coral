@@ -131,7 +131,8 @@ def process_outs(prediction, conf_thres=25, iou_thres=.45, classes=None, agnosti
         #         i = i[iou.sum(1) > 1]  # require redundancy
 
         k = [x[u] for u in i]
-        print(k[0])
+        print(k)
+        print(xi)
         # output[xi] = k[0]
         # print(output)
         if (time.time() - t) > time_limit:
