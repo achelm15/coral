@@ -81,20 +81,21 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     
     print(pred)
 
-    # print(pred)
-    # print(pred[:,:4])
-    # print(pred[:,4])
-    # print(pred[:,5])
-    # boxes = pred[:,:4]
-    # print(boxes)
-    # boxes = np.fliplr(boxes)
-    # print(boxes)
-    # image = cv2.imread(pathname)
-    # shape = image.shape
-    # print(shape)
-    # width, height = shape[1]/256, shape[0]/256
-    # image_dims = [width, height, width, height]
-    # boxes = boxes * image_dims
+    print(pred)
+    print(pred[:,:4])
+    print(pred[:,4])
+    print(pred[:,5])
+    boxes = pred[:,:4]
+    print(boxes)
+    boxes = np.fliplr(boxes)
+    print(boxes)
+    image = cv2.imread(pathname)
+    shape = image.shape
+    print(shape)
+    width, height = shape[1]/256, shape[0]/256
+    image_dims = [width, height, width, height]
+    boxes = boxes * image_dims
+    print(boxes)
     # scores = pred[:,4]
     # classes = pred[:,5]
     # if boxes is not None:
