@@ -130,7 +130,7 @@ def nms(boxes, scores, threshold):
 
 
 
-def process_outs(prediction, conf_thres=25, iou_thres=.45, classes=None, agnostic=False, multi_label=False, labels=(), max_det=300):
+def process_outs(prediction, conf_thres=.25, iou_thres=.45, classes=None, agnostic=False, multi_label=False, labels=(), max_det=300):
     nc = prediction.shape[2] - 5  # number of classes
     xc = prediction[..., 4] > conf_thres  # candidates
 
@@ -153,8 +153,8 @@ def process_outs(prediction, conf_thres=25, iou_thres=.45, classes=None, agnosti
 
         # Compute conf
         x = x.astype('float32')
-        x[:, 5:] = x[:, 5:]/100
-        x[:, 4:5] = x[:, 4:5]/100
+        x[:, 5:] = x[:, 5:]
+        x[:, 4:5] = x[:, 4:5]
         x[:, 5:] *= x[:, 4:5] # conf = obj_conf * cls_conf
 
         # Box (center x, center y, width, height) to (x1, y1, x2, y2)
@@ -162,7 +162,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=.45, classes=None, agnosti
 
         # Detections matrix nx6 (xyxy, conf, cls)
         if multi_label:
-            i, j = (x[:, 5:] > conf_thres/100).nonzero(as_tuple=False).T
+            i, j = (x[:, 5:] > conf_thres).nonzero(as_tuple=False).T
             x = np.concatenate((box[i], x[i, j + 5, None], j[:, None].float()), 1)
         else:  # best class only
             conf = np.array(x[:,5:]).max(1, keepdims=True)
@@ -171,7 +171,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=.45, classes=None, agnosti
             x = np.concatenate((box, conf, j), 1)
             deletions = []
             for index in range(0,len(x)):
-                test = conf[index]<conf_thres/100
+                test = conf[index]<conf_thres
                 if test[0]:
                     deletions.append(index)
             x = np.array([x[item].tolist() for item in range(0,len(x)) if item not in deletions])
