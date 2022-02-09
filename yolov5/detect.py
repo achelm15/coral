@@ -42,22 +42,22 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     print(time)
 
     print(pred)
-    for i, det in enumerate(pred):
-        print(i,det)
-        print(img.shape)
-        print(im0.shape)
-        print(img.shape[1:3])
-        h = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
-        print(h)
-        # det[:, :4] =
-        annotator = Annotator(im0, line_width=3, example=str(data))
-        for *xyxy, conf, cls in reversed(det):
-            c = int(cls)  # integer class
-            label = data[c]
-            annotator.box_label(xyxy, label, color=colors(c, True))
-        im0 = annotator.result()
-        if True:
-                cv2.imwrite("test"+pathname, im0)
+    det = pred
+    print(i,det)
+    print(img.shape)
+    print(im0.shape)
+    print(img.shape[1:3])
+    h = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
+    print(h)
+    # det[:, :4] =
+    annotator = Annotator(im0, line_width=3, example=str(data))
+    for *xyxy, conf, cls in reversed(det):
+        c = int(cls)  # integer class
+        label = data[c]
+        annotator.box_label(xyxy, label, color=colors(c, True))
+    im0 = annotator.result()
+    if True:
+        cv2.imwrite("test"+pathname, im0)
     return outs, time
 
 
