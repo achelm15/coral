@@ -117,8 +117,8 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
                 print(test[0])
                 if test[0]:
                     deletions.append(index)
-            for i in deletions:
-                np.delete(x,i,0)
+            for i in range(0, len(deletions)):
+                x = np.delete(x,deletions[1]-i,0)
             print("Asdfasdf")
             print(x.shape)
         # # Filter by class
