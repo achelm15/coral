@@ -117,6 +117,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
                 test = conf[index]<conf_thres/100
                 if test[0]:
                     deletions.append(index)
+            print(deletions)
             for i in range(0, len(deletions)):
                 x = np.delete(x,deletions[1]-i,0)
             print("Asdfasdf")
