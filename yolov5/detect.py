@@ -46,7 +46,9 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     print(img.shape)
     print(im0.shape)
     print(img.shape[1:3])
+    print(det)
     det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
+    print(det)
     annotator = Annotator(im0, line_width=3, example=str(data))
     for *xyxy, conf, cls in reversed(det):
         c = int(cls)  # integer class
