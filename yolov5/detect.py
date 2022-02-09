@@ -46,9 +46,7 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     print(img.shape)
     print(im0.shape)
     print(img.shape[1:3])
-    h = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
-    print(h)
-    # det[:, :4] =
+    det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
     annotator = Annotator(im0, line_width=3, example=str(data))
     for *xyxy, conf, cls in reversed(det):
         c = int(cls)  # integer class
@@ -56,7 +54,8 @@ def detect_image(image, interpreter, imgsz, data, pathname):
         annotator.box_label(xyxy, label, color=colors(c, True))
     im0 = annotator.result()
     if True:
-        cv2.imwrite("test"+pathname, im0)
+        print("asdfas")
+        cv2.imwrite(pathname[len(pathname)-5:]+"test.jpg", im0)
     return outs, time
 
 
