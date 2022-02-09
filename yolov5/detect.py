@@ -107,16 +107,14 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
 
         # Filter by class
         if classes is not None:
-            print("asdf")
             x = x[(x[:, 5:6] == np.array(classes)).any(1)]
 
-        print(x)
-        # # Check shapes
-        # n = x.shape[0]  # number of boxes
-        # if not n:  # no boxes
-        #     continue
-        # elif n > max_nms:  # excess boxes
-        #     x = x[x[:, 4].argsort(descending=True)[:max_nms]]  # sort by confidence
+        # Check shapes
+        n = x.shape[0]  # number of boxes
+        if not n:  # no boxes
+            continue
+        elif n > max_nms:  # excess boxes
+            x = x[x[:, 4].argsort(descending=True)[:max_nms]]  # sort by confidence
 
         # # Batched NMS
         # c = x[:, 5:6] * (0 if agnostic else max_wh)  # classes
