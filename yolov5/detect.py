@@ -105,7 +105,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
             print(conf)
             print(j)
             print(box)
-            x = np.concatenate((np.array(box), np.array(conf), np.array(j)), 1)[conf.view(-1) > conf_thres]
+            x = np.concatenate((np.array(box), np.array(conf), np.array(j)), 1, dtype='float32')[conf.view(-1) > conf_thres]
             # print(x)
         # # Filter by class
         # if classes is not None:
