@@ -82,6 +82,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
 
         # Compute conf
         print( x[:, 5:]*x[:, 4:5])
+        print( x[:, 5:]/100*x[:, 4:5]/100)
         print(x[:, 5:])
         print(x[:, 4:5])
         x[:, 5:] *= x[:, 4:5]  # conf = obj_conf * cls_conf
