@@ -59,7 +59,7 @@ def nms(boxes, scores, threshold):
 
 
 
-def process_outs(prediction, conf_thres=0.25, iou_thres=45, classes=None, agnostic=False, multi_label=False, labels=(), max_det=300):
+def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic=False, multi_label=False, labels=(), max_det=300):
     nc = prediction.shape[2] - 5  # number of classes
     xc = prediction[..., 4] > conf_thres  # candidates
 
@@ -81,12 +81,9 @@ def process_outs(prediction, conf_thres=0.25, iou_thres=45, classes=None, agnost
             continue
 
         # Compute conf
-        print( x[:, 5:]*x[:, 4:5])
-        print( x[:, 5:]/100*x[:, 4:5]/100)
+        print( x[:, 5:]/100*x[:, 4:5]/1000)
         print(x[:, 5:])
         print(x[:, 4:5])
-        x[:, 5:] = x[:, 5:]/100
-        x[:, 4:5] = x[:, 4:5]/100
         x[:, 5:] *= x[:, 4:5]  # conf = obj_conf * cls_conf
 
         # Box (center x, center y, width, height) to (x1, y1, x2, y2)
