@@ -89,7 +89,7 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     image = cv2.imread(pathname)
     shape = image.shape
     print(shape)
-    width, height = shape[1]/256, shape[0]/256
+    width, height = shape[0]/256, shape[1]/256
     image_dims = [width, height, width, height]
     boxes = boxes * image_dims
     print(boxes)
