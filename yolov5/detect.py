@@ -180,7 +180,8 @@ def detect_image(image, interpreter, imgsz, data):
     print(time)
 
     print(pred)
-
+    for i, det in enumerate(pred):
+        print(det)
     return outs, time
 
 
