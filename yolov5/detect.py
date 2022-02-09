@@ -113,7 +113,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
             for index in range(0,len(x)):
                 print(conf[index]<conf_thres)
                 if conf[index]<conf_thres:
-                    x = np.delete(x,index)
+                    x = np.delete(x,index,axis=1)
             print(x)
         # # Filter by class
         # if classes is not None:
