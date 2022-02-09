@@ -166,7 +166,7 @@ def detect_image(image, interpreter, imgsz):
     outs = [np.array(outs)]
     image = np.array(image)
     pred = process_outs(outs[0])
-    print(pred[:,5].unique())
+    print(np.unique(pred[:,5], return_counts=True))
 
     print(time)
     return outs, time
