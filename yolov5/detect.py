@@ -61,13 +61,13 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     outs = [np.array(outs)]
     scale, zero_point = interpreter.get_output_details()[0]["quantization"]
     pred = (outs[0].astype(np.float32) - zero_point) * scale  # re-scale
-    print(pred)
     pred[..., 0] *= imgsz  # x
     pred[..., 1] *= imgsz  # y
     pred[..., 2] *= imgsz  # w
     pred[..., 3] *= imgsz  # h
-    print(pred)
+    
     pred = process_outs(pred)
+    print(pred)
     results = np.unique(pred[:,5], return_counts=True)
     results = ([(data[int(i)]+"s") for i in results[0]], results[1])
     result_s = "Found: "
@@ -83,7 +83,7 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     image = cv2.imread(pathname)
     shape = image.shape
     width, height = shape[1]/256, shape[0]/256
-    image_dims = [width, height, width/2, height/2]
+    image_dims = [width, height, width, height]
     boxes = boxes * image_dims
     scores = pred[:,4]
     classes = pred[:,5]
