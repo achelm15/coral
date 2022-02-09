@@ -120,6 +120,8 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
         c = x[:, 5:6] * (0 if agnostic else max_wh)  # classes
         print(c)
         boxes, scores = x[:, :4] + c, x[:, 4]  # boxes (offset by class), scores
+        print(boxes)
+        print(scores)
         i = nms(boxes, scores, iou_thres)  # NMS
         if np.array(i).shape[0] > max_det:  # limit detections
             i = i[:max_det]
