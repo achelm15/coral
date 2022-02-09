@@ -96,7 +96,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
 
         # Detections matrix nx6 (xyxy, conf, cls)
         if multi_label:
-            i, j = (x[:, 5:] > conf_thres).nonzero(as_tuple=False).T
+            i, j = (x[:, 5:] > conf_thres/100).nonzero(as_tuple=False).T
             x = np.concatenate((box[i], x[i, j + 5, None], j[:, None].float()), 1)
         else:  # best class only
             print(x)
@@ -107,7 +107,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
             print(j)
             print(box)
             x = np.concatenate((box, conf, j), 1)
-            print(conf>conf_thres)
+            print(conf>conf_thres/100)
             print(x)
         # # Filter by class
         # if classes is not None:
