@@ -41,7 +41,7 @@ def draw(image, boxes, scores, classes, all_classes):
                     0.6, (0, 0, 255), 1,
                     cv2.LINE_AA)
 
-        print('class: {0}, score: {1:.2f}'.format(all_classes[cl], score))
+        print('class: {0}, score: {1:.2f}'.format(all_classes[int(cl)], score))
         print('box coordinate x,y,w,h: {0}'.format(box))
 
     print()
