@@ -119,10 +119,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=.45, classes=None, agnosti
 
         # Batched NMS
         c = x[:, 5:6] * (0 if agnostic else max_wh)  # classes
-        print(c)
         boxes, scores = x[:, :4] + c, x[:, 4]  # boxes (offset by class), scores
-        print(boxes)
-        print(scores)
         i = nms(boxes, scores, iou_thres)  # NMS
         if np.array(i).shape[0] > max_det:  # limit detections
             i = i[:max_det]
@@ -134,7 +131,8 @@ def process_outs(prediction, conf_thres=25, iou_thres=.45, classes=None, agnosti
         #     if redundant:
         #         i = i[iou.sum(1) > 1]  # require redundancy
 
-        output[xi] = x[i]
+        # output[xi] = x[i]
+        print(output)
         if (time.time() - t) > time_limit:
             print(f'WARNING: NMS time limit {time_limit}s exceeded')
             break  # time limit exceeded
