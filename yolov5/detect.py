@@ -42,24 +42,30 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     print(time)
 
     print(pred)
-    det = pred
-    print(img.shape)
-    print(im0.shape)
-    print(img.shape[1:3])
-    print(det)
-    print(det[:,:4])
-    det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
-    print(det)
-    annotator = Annotator(im0, line_width=3, example=str(data))
-    for *xyxy, conf, cls in reversed(det):
-        c = int(cls)  # integer class
-        label = data[c]
-        print(xyxy)
-        annotator.box_label(xyxy, label, color=colors(c, True))
-    im0 = annotator.result()
-    if True:
-        print("asdfas")
-        cv2.imwrite(pathname[len(pathname)-5:]+"test.jpg", im0)
+    print(pred[:,4:])
+    print(pred[:,5])
+    print(pred[:,6])
+    # det = pred
+    # print(img.shape)
+    # print(im0.shape)
+    # print(img.shape[1:3])
+    # print(det)
+    # print(det[:,:4])
+    # width, height = shape[1], shape[0]
+    # image_dims = [width, height, width, height]
+    # det[:,:4]
+    # # det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
+    # print(det)
+    # annotator = Annotator(im0, line_width=3, example=str(data))
+    # for *xyxy, conf, cls in reversed(det):
+    #     c = int(cls)  # integer class
+    #     label = data[c]
+    #     print(xyxy)
+    #     annotator.box_label(xyxy, label, color=colors(c, True))
+    # im0 = annotator.result()
+    # if True:
+    #     print("asdfas")
+    #     cv2.imwrite(pathname[len(pathname)-5:]+"test.jpg", im0)
     return outs, time
 
 
