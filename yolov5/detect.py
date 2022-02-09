@@ -147,7 +147,6 @@ def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, dat
     if source.endswith("jpg") or source.endswith("jpeg"):
         image = Image.open(source)
         new_image = detect_image(image, interpreter, imgsz, data, source)
-        cv2.imwrite(source[:len(source)-5]+"123test.jpg", new_image)
     elif source.endswith("m4v") or source.endswith("mp4"): 
         video = source
         detect_video(video, interpreter, imgsz, data)
