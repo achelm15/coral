@@ -116,12 +116,13 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
         elif n > max_nms:  # excess boxes
             x = x[x[:, 4].argsort(descending=True)[:max_nms]]  # sort by confidence
 
-        # # Batched NMS
-        # c = x[:, 5:6] * (0 if agnostic else max_wh)  # classes
-        # boxes, scores = x[:, :4] + c, x[:, 4]  # boxes (offset by class), scores
-        # i = nms(boxes, scores, iou_thres)  # NMS
-        # if np.array(i).shape[0] > max_det:  # limit detections
-        #     i = i[:max_det]
+        # Batched NMS
+        c = x[:, 5:6] * (0 if agnostic else max_wh)  # classes
+        boxes, scores = x[:, :4] + c, x[:, 4]  # boxes (offset by class), scores
+        i = nms(boxes, scores, iou_thres)  # NMS
+        if np.array(i).shape[0] > max_det:  # limit detections
+            i = i[:max_det]
+        print(i)
         # if merge and (1 < n < 3E3):  # Merge NMS (boxes merged using weighted mean)
         #     # update boxes as boxes(i,4) = weights(i,n) * boxes(n,4)
         #     iou = box_iou(boxes[i], boxes) > iou_thres  # iou matrix
