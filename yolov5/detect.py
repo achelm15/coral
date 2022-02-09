@@ -79,12 +79,7 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     print(result_s)
     print(time)
     
-    # pred[..., 0] *= imgsz  # x
-    # pred[..., 1] *= imgsz  # y
-    # pred[..., 2] *= imgsz  # w
-    # pred[..., 3] *= imgsz  # h
-
-
+    print(pred)
 
     # print(pred)
     # print(pred[:,:4])
