@@ -15,11 +15,51 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
+def nms(boxes, scores, threshold):
+    """Returns a list of indexes of objects passing the NMS.
+    Args:
+        objects: result candidates.
+        threshold: the threshold of overlapping IoU to merge the boxes.
+    Returns:
+        A list of indexes containings the objects that pass the NMS.
+    """
+    if len(boxes) == 1:
+        return [0]
+
+    xmins = boxes[:, 0]
+    ymins = boxes[:, 1]
+    xmaxs = boxes[:, 2]
+    ymaxs = boxes[:, 3]
+
+    areas = (xmaxs - xmins) * (ymaxs - ymins)
+    idxs = np.argsort(scores)
+
+    selected_idxs = []
+    while idxs.size != 0:
+
+        selected_idx = idxs[-1]
+        selected_idxs.append(selected_idx)
+
+        overlapped_xmins = np.maximum(xmins[selected_idx], xmins[idxs[:-1]])
+        overlapped_ymins = np.maximum(ymins[selected_idx], ymins[idxs[:-1]])
+        overlapped_xmaxs = np.minimum(xmaxs[selected_idx], xmaxs[idxs[:-1]])
+        overlapped_ymaxs = np.minimum(ymaxs[selected_idx], ymaxs[idxs[:-1]])
+
+        w = np.maximum(0, overlapped_xmaxs - overlapped_xmins)
+        h = np.maximum(0, overlapped_ymaxs - overlapped_ymins)
+
+        intersections = w * h
+        unions = areas[idxs[:-1]] + areas[selected_idx] - intersections
+        ious = intersections / unions
+
+        idxs = np.delete(
+            idxs, np.concatenate(([len(idxs) - 1], np.where(ious > threshold)[0])))
+
+    return selected_idxs
+
+
 
 def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic=False, multi_label=False, labels=(), max_det=300):
-    print(prediction.shape)
-    print("10100100101001010010010100101000101010100101010")
-    print(prediction)
     nc = prediction.shape[2] - 5  # number of classes
     xc = prediction[..., 4] > conf_thres  # candidates
 
@@ -29,7 +69,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
     redundant = True  # require redundant detections
     multi_label &= nc > 1  # multiple labels per box (adds 0.5ms/img)
     merge = False  # use merge-NMS
-
+    t = time.time()
     output = np.zeros((0,6))*prediction.shape[0]
     for xi, x in enumerate(prediction):  # image index, image inference
         # Apply constraints
@@ -51,12 +91,10 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
             i, j = (x[:, 5:] > conf_thres).nonzero(as_tuple=False).T
             x = np.concatenate((box[i], x[i, j + 5, None], j[:, None].float()), 1)
         else:  # best class only
-            print(x.shape)
-            print(x[:,5:])
-            d = x[:, 5:].max(1)
-            print(d)
-        #     x = np.concatenate((box, conf, j.float()), 1)[conf.view(-1) > conf_thres]
-
+            conf = np.array(x[:,5:]).max(1, keepdims=True)
+            j = np.array([np.array(np.argmax(x[:,5:],1))]).T
+            x = np.concatenate((box, conf, j), 1)[conf.view(-1) > conf_thres]
+            print(x)
         # # Filter by class
         # if classes is not None:
         #     x = x[(x[:, 5:6] == np.array(classes)).any(1)]
@@ -72,10 +110,8 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
         # # Batched NMS
         # c = x[:, 5:6] * (0 if agnostic else max_wh)  # classes
         # boxes, scores = x[:, :4] + c, x[:, 4]  # boxes (offset by class), scores
-        # print(boxes.shapeks, scores.shape)
-        # print(boxes.shape, scores.shape, "999999999999999999999999999999999999")
-        # i = torchvision.ops.nms(boxes, scores, iou_thres)  # NMS
-        # if i.shape[0] > max_det:  # limit detections
+        # i = nms(boxes, scores, iou_thres)  # NMS
+        # if np.array(i).shape[0] > max_det:  # limit detections
         #     i = i[:max_det]
         # if merge and (1 < n < 3E3):  # Merge NMS (boxes merged using weighted mean)
         #     # update boxes as boxes(i,4) = weights(i,n) * boxes(n,4)
@@ -90,9 +126,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
         #     print(f'WARNING: NMS time limit {time_limit}s exceeded')
         #     break  # time limit exceeded
 
-
-
-    return
+    return  output
 
 def xywh2xyxy(x):
     # Convert nx4 boxes from [x, y, w, h] to [x1, y1, x2, y2] where xy1=top-left, xy2=bottom-right
@@ -122,7 +156,7 @@ def detect_image(image, interpreter, imgsz):
     shape = np.array(pimage).shape
     outs = [np.array(outs)]
     image = np.array(image)
-    process_outs(outs[0])
+    pred = process_outs(outs[0])
     print(time)
     return outs, time
 
