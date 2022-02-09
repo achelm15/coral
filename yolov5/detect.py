@@ -155,8 +155,8 @@ ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 def detect_image(image, interpreter, imgsz, data):
     pimage = process_image(image,imgsz)
-    print(np.array(image).shape)
-    print(pimage.shape)
+    img = np.array(image).shape
+    im0 = pimage.shape
     input_index = interpreter.get_input_details()[0]["index"]
     output_index = interpreter.get_output_details()[0]["index"]
     interpreter.set_tensor(input_index, np.array(pimage, dtype="uint8"))
@@ -178,6 +178,9 @@ def detect_image(image, interpreter, imgsz, data):
             result_s+=str(int(results[1][x])) + " " + results[0][x]
     print(result_s)
     print(time)
+
+    print(pred)
+
     return outs, time
 
 
