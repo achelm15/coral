@@ -168,7 +168,7 @@ def detect_image(image, interpreter, imgsz):
     pred = process_outs(outs[0])
     results = np.unique(pred[:,5], return_counts=True)
     print(results)
-    results = ([("Class "+str(i)+"\'s") for i in results[0]], results[1])
+    results = ([("Class "+str(int(i))+"\'s") for i in results[0]], results[1])
     print(results)
     
 
