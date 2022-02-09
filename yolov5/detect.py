@@ -99,32 +99,22 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
             i, j = (x[:, 5:] > conf_thres/100).nonzero(as_tuple=False).T
             x = np.concatenate((box[i], x[i, j + 5, None], j[:, None].float()), 1)
         else:  # best class only
-            print(x)
             conf = np.array(x[:,5:]).max(1, keepdims=True)
             j = np.array([np.array(np.argmax(x[:,5:],1))]).T
-            print(conf)
             j = j.astype('float32')
-            print(j)
-            print(box)
             x = np.concatenate((box, conf, j), 1)
-            # x = x[conf>conf_thres/100]
-            # print(x)
-            print(x.shape)
-            print(conf)
-            print(x)
             deletions = []
             for index in range(0,len(x)):
                 test = conf[index]<conf_thres/100
                 if test[0]:
                     deletions.append(index)
-            print(deletions)
             x = np.array([x[item].tolist() for item in range(0,len(x)) if item not in deletions])
-            
+
         # Filter by class
         if classes is not None:
             x = x[(x[:, 5:6] == np.array(classes)).any(1)]
 
-
+        print(x)
         # # Check shapes
         # n = x.shape[0]  # number of boxes
         # if not n:  # no boxes
