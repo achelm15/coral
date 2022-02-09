@@ -75,7 +75,7 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     print(pred[:,:4])
     print(pred[:,4])
     print(pred[:,5])
-    boxes = pred[:,:4]
+    boxes = reversed(pred[:,:4])
     image = cv2.imread(pathname)
     shape = image.shape
     print(shape)
