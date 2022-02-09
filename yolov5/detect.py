@@ -166,7 +166,10 @@ def detect_image(image, interpreter, imgsz):
     outs = [np.array(outs)]
     image = np.array(image)
     pred = process_outs(outs[0])
-    print(np.unique(pred[:,5], return_counts=True))
+    results = np.unique(pred[:,5], return_counts=True)
+    results[0] = ["Class "+ str(i)+ "\'s" for i in results[0]]
+    print(results)
+    
 
     print(time)
     return outs, time
