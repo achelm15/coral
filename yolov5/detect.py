@@ -129,7 +129,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=.45, classes=None, agnosti
         #     x[i, :4] = torch.mm(weights, x[:, :4]).float() / weights.sum(1, keepdim=True)  # merged boxes
         #     if redundant:
         #         i = i[iou.sum(1) > 1]  # require redundancy
-
+        print(output)
         k = [x[u] for u in i]
         print(k)
         print(xi)
