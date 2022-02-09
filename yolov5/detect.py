@@ -107,8 +107,10 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
             print(j)
             print(box)
             x = np.concatenate((box, conf, j), 1)
-            x = x[conf>conf_thres/100]
-            print(x)
+            # x = x[conf>conf_thres/100]
+            # print(x)
+            for index in range(0,len(x)):
+                print(conf[index])
         # # Filter by class
         # if classes is not None:
         #     x = x[(x[:, 5:6] == np.array(classes)).any(1)]
