@@ -59,22 +59,28 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     time = datetime.datetime.now() - start
     outs = interpreter.get_tensor(output_index)
     outs = [np.array(outs)]
-    pred = process_outs(outs[0])
-    results = np.unique(pred[:,5], return_counts=True)
-    results = ([(data[int(i)]+"s") for i in results[0]], results[1])
-    result_s = "Found: "
-    for x in range(0,len(results[0])):
-        if x != len(results[0])-1:
-            result_s+=str(int(results[1][x])) + " " + results[0][x] + ", "
-        else:
-            result_s+=str(int(results[1][x])) + " " + results[0][x]
-    print(result_s)
-    print(time)
+    scale, zero_point = interpreter.get_output_details()[0]["quantization"]
+    pred = (outs[0].astype(np.float32) - zero_point) * scale  # re-scale
+    print(pred)
+    # pred = process_outs(pred)
+    # results = np.unique(pred[:,5], return_counts=True)
+    # results = ([(data[int(i)]+"s") for i in results[0]], results[1])
+    # result_s = "Found: "
+    # for x in range(0,len(results[0])):
+    #     if x != len(results[0])-1:
+    #         result_s+=str(int(results[1][x])) + " " + results[0][x] + ", "
+    #     else:
+    #         result_s+=str(int(results[1][x])) + " " + results[0][x]
+    # print(result_s)
+    # print(time)
     
-    pred[..., 0] *= imgsz  # x
-    pred[..., 1] *= imgsz  # y
-    pred[..., 2] *= imgsz  # w
-    pred[..., 3] *= imgsz  # h
+    # pred[..., 0] *= imgsz  # x
+    # pred[..., 1] *= imgsz  # y
+    # pred[..., 2] *= imgsz  # w
+    # pred[..., 3] *= imgsz  # h
+
+
+
     # print(pred)
     # print(pred[:,:4])
     # print(pred[:,4])
