@@ -60,7 +60,7 @@ def nms(boxes, scores, threshold):
 
 
 
-def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic=False, multi_label=False, labels=(), max_det=300):
+def process_outs(prediction, conf_thres=25, iou_thres=.45, classes=None, agnostic=False, multi_label=False, labels=(), max_det=300):
     nc = prediction.shape[2] - 5  # number of classes
     xc = prediction[..., 4] > conf_thres  # candidates
 
