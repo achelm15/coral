@@ -111,10 +111,10 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
             # print(x)
             print(x.shape)
             print(conf.shape)
+            print(x)
             deletions = []
             for index in range(0,len(x)):
                 test = conf[index]<conf_thres/100
-                print(test[0])
                 if test[0]:
                     deletions.append(index)
             for i in range(0, len(deletions)):
