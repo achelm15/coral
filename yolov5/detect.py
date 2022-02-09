@@ -90,7 +90,7 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     shape = image.shape
     print(shape)
     width, height = shape[1]/256, shape[0]/256
-    image_dims = [width, height, width, height]
+    image_dims = [1, 1, width, height]
     boxes = boxes * image_dims
     print(boxes)
     scores = pred[:,4]
