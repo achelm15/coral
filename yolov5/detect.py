@@ -96,11 +96,11 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     image_dims = [width, height, width, height]
     boxes = boxes * image_dims
     print(boxes)
-    # scores = pred[:,4]
-    # classes = pred[:,5]
-    # if boxes is not None:
-    #     draw(image, boxes, scores, classes, data)
-    # return image
+    scores = pred[:,4]
+    classes = pred[:,5]
+    if boxes is not None:
+        draw(image, boxes, scores, classes, data)
+    return image
 
 
     # print(pred)
