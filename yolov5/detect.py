@@ -153,7 +153,7 @@ ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 #     return image
 
 
-def detect_image(image, interpreter, imgsz):
+def detect_image(image, interpreter, imgsz, data):
     pimage = process_image(image,imgsz)
     input_index = interpreter.get_input_details()[0]["index"]
     output_index = interpreter.get_output_details()[0]["index"]
@@ -167,7 +167,7 @@ def detect_image(image, interpreter, imgsz):
     image = np.array(image)
     pred = process_outs(outs[0])
     results = np.unique(pred[:,5], return_counts=True)
-    results = ([("Class "+str(int(i))+"\'s") for i in results[0]], results[1])
+    results = ([(data[int(i)]+"s") for i in results[0]], results[1])
     result_s = "Found: "
     for x in range(0,len(results[0])):
         if x != len(results[0])-1:
@@ -179,13 +179,13 @@ def detect_image(image, interpreter, imgsz):
     return outs, time
 
 
-def detect_video(video, interpreter, imgsz):
+def detect_video(video, interpreter, imgsz, data):
     vidcap = cv2.VideoCapture(video)
     success, image = vidcap.read()
     count = 0
     time_array = []
     while success and count<20:
-        outs, time = detect_image(Image.fromarray(image), interpreter, imgsz)
+        outs, time = detect_image(Image.fromarray(image), interpreter, imgsz, data)
         print(np.array(outs).shape)
         time_array.append(time)
         success, image = vidcap.read()
@@ -196,7 +196,7 @@ def detect_video(video, interpreter, imgsz):
 
 def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, data="datasets/LPCV.yaml"):
     model_path, source, imgsz, data= opt.weights, opt.source, opt.imgsz, opt.data
-    data = get_data_dict(data)
+    data = get_data_dict(data)['names']
     interpreter = tflite.Interpreter(model_path)
     interpreter = tflite.Interpreter(model_path, experimental_delegates=[tflite.load_delegate("libedgetpu.so.1")])
     # import tensorflow as tf
@@ -208,10 +208,10 @@ def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, dat
     
     if source.endswith("jpg") or source.endswith("jpeg"):
         source = Image.open(source)
-        detect_image(source, interpreter, imgsz)
+        detect_image(source, interpreter, imgsz, data)
     elif source.endswith("m4v") or source.endswith("mp4"): 
         video = source
-        detect_video(video, interpreter, imgsz)
+        detect_video(video, interpreter, imgsz, data)
     else:
         return
 
