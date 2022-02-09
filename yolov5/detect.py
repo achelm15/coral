@@ -71,6 +71,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=.45, classes=None, agnosti
     merge = False  # use merge-NMS
     t = time.time()
     output = np.zeros((0,6))*prediction.shape[0]
+    print(output)
     for xi, x in enumerate(prediction):  # image index, image inference
         # Apply constraints
         # x[((x[..., 2:4] < min_wh) | (x[..., 2:4] > max_wh)).any(1), 4] = 0  # width-height
