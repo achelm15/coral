@@ -121,6 +121,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
                 x = np.delete(x,deletions[1]-i,0)
             print("Asdfasdf")
             print(x.shape)
+            print(x)
         # # Filter by class
         # if classes is not None:
         #     x = x[(x[:, 5:6] == np.array(classes)).any(1)]
