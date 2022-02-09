@@ -109,7 +109,8 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
             x = np.concatenate((box, conf, j), 1)
             # x = x[conf>conf_thres/100]
             # print(x)
-            print(x)
+            print(x.shape)
+            print(conf.shape)
             for index in range(0,len(x)):
                 test = conf[index]<conf_thres
                 print(test[0])
