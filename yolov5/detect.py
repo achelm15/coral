@@ -194,7 +194,7 @@ def detect_video(video, interpreter, imgsz):
     return
 
 
-def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256):
+def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, data="datasets/LPCV.yaml"):
     model_path, source, imgsz, data= opt.weights, opt.source, opt.imgsz, opt.data
     data = get_data_dict(data)
     interpreter = tflite.Interpreter(model_path)
