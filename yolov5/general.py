@@ -1,5 +1,7 @@
 import numpy as np
 import time
+import yaml
+from pathlib import Path
 
 def nms(boxes, scores, threshold):
     """Returns a list of indexes of objects passing the NMS.
@@ -137,3 +139,10 @@ def process_image(img, imgsz):
     #     image /= 255.
     image = np.expand_dims(image, axis=0)
     return image
+
+def get_data_dict(data):
+    if isinstance(data, (str, Path)):
+            with open(data, errors='ignore') as f:
+                data = yaml.safe_load(f)  # dictionary
+    print(data)
+    return data

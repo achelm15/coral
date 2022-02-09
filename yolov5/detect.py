@@ -7,8 +7,7 @@ import os
 import sys
 from pathlib import Path
 import cv2
-import time
-from general import nms, process_outs, process_image
+from general import process_outs, process_image, get_data_dict
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -196,9 +195,8 @@ def detect_video(video, interpreter, imgsz):
 
 
 def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256):
-    model_path = opt.weights
-    source = opt.source
-    imgsz = opt.imgsz
+    model_path, source, imgsz, data= opt.weights, opt.source, opt.imgsz, opt.data
+    data = get_data_dict(data)
     interpreter = tflite.Interpreter(model_path)
     interpreter = tflite.Interpreter(model_path, experimental_delegates=[tflite.load_delegate("libedgetpu.so.1")])
     # import tensorflow as tf
@@ -227,6 +225,7 @@ def parse_opt():
     parser.add_argument("--weights", type=str, default=ROOT / "./models/test.tflite", help="model path(s)",)
     parser.add_argument("--source", type=str,default=ROOT / "./sources/test.jpg",)
     parser.add_argument("--imgsz", type=int, default=256)
+    parser.add_argument('--data', type=str, default=ROOT / 'datasets/LPCV.yaml', help='dataset.yaml path')
     opt = parser.parse_args()
     return opt
 
