@@ -43,8 +43,8 @@ def detect_image(image, interpreter, imgsz, data, pathname):
 
     print(pred)
     print(pred[:,4:])
+    print(pred[:,4])
     print(pred[:,5])
-    print(pred[:,6])
     # det = pred
     # print(img.shape)
     # print(im0.shape)
