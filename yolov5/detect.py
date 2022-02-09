@@ -114,7 +114,7 @@ def process_outs(prediction, conf_thres=25, iou_thres=45, classes=None, agnostic
                 test = conf[index]<conf_thres
                 print(test[0])
                 if test[0]:
-                    x = np.delete(x,index,1)
+                    x = np.delete(x,index,0)
             print("Asdfasdf")
             print(x)
         # # Filter by class
