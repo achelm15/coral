@@ -155,6 +155,8 @@ ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 def detect_image(image, interpreter, imgsz, data):
     pimage = process_image(image,imgsz)
+    print(image.shape)
+    print(pimage.shape)
     input_index = interpreter.get_input_details()[0]["index"]
     output_index = interpreter.get_output_details()[0]["index"]
     interpreter.set_tensor(input_index, np.array(pimage, dtype="uint8"))
@@ -186,7 +188,6 @@ def detect_video(video, interpreter, imgsz, data):
     time_array = []
     while success and count<20:
         outs, time = detect_image(Image.fromarray(image), interpreter, imgsz, data)
-        print(np.array(outs).shape)
         time_array.append(time)
         success, image = vidcap.read()
         count += 1
