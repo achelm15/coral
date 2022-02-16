@@ -104,7 +104,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
     vout.open("OutPut"+out, fourcc, fps, sz, True)
     count = 0
     time_array = []
-    while True and count < 20:
+    while True:
         res, frame = camera.read()
         if count%2==0:
             vout.write(np.array(frame))
