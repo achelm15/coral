@@ -86,7 +86,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
     camera = cv2.VideoCapture(video)
     fps = camera.get(cv2.CAP_PROP_FPS)
 
-    cv2.namedWindow("detection", cv2.WINDOW_NORMAL)
+    # cv2.namedWindow("detection", cv2.WINDOW_NORMAL)
 
     # Prepare for saving the detected video
     sz = (int(camera.get(cv2.CAP_PROP_FRAME_WIDTH)),
