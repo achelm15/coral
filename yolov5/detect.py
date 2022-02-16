@@ -83,8 +83,10 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     shape = test_img0.shape
     scores = pred[:,4]
     classes = pred[:,5].astype("uint8")
+    start3 = datetime.datetime.now()
     if boxes is not None:
         draw(test_img0, boxes, scores, classes, data)
+    print("NEWISH", datetime.datetime.now()-start3)
     time1 = datetime.datetime.now() - start1
     print("Larger time: ", time1)
     return test_img0, time
