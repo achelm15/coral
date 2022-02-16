@@ -1,5 +1,6 @@
 # import tflite_runtime.interpreter as tflite
 import importlib
+from importlib import util
 from PIL import Image
 import datetime
 import numpy as np
@@ -135,7 +136,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
 def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, data="datasets/LPCV.yaml", conf=0.25):
     model_path, source, imgsz, data= opt.weights, opt.source, opt.imgsz, opt.data
     data = get_data_dict(data)['names']
-    spam_loader = importlib.util.find_spec('tflite_runtime')
+    spam_loader = util.find_spec('tflite_runtime')
     found = spam_loader is not None
     if found:
         import tflite_runtime.interpreter as tflite
