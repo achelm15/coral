@@ -1,4 +1,5 @@
-import tflite_runtime.interpreter as tflite
+# import tflite_runtime.interpreter as tflite
+import importlib
 from PIL import Image
 import datetime
 import numpy as np
@@ -7,6 +8,7 @@ import os
 import sys
 from pathlib import Path
 import cv2
+from sys import platform
 from general import process_outs, get_data_dict, scale_coords, letterbox
 
 FILE = Path(__file__).resolve()
@@ -85,8 +87,8 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
 def detect_video(video, interpreter, imgsz, data, conf):
     camera = cv2.VideoCapture(video)
     fps = camera.get(cv2.CAP_PROP_FPS)
-
-    # cv2.namedWindow("detection", cv2.WINDOW_NORMAL)
+    if platform == "darwin" or platform =="win32":
+        cv2.namedWindow("detection", cv2.WINDOW_NORMAL)
 
     # Prepare for saving the detected video
     sz = (int(camera.get(cv2.CAP_PROP_FRAME_WIDTH)),
@@ -94,11 +96,15 @@ def detect_video(video, interpreter, imgsz, data, conf):
     fourcc = cv2.VideoWriter_fourcc('m','p','4','v')
 
     vout = cv2.VideoWriter()
-    out = video.split('/')[1]
+    out = video.split('/')
+    if len(out)==2:
+        out = out[1]
+    else:
+        out = out[0]
     vout.open("OutPut"+out, fourcc, fps, sz, True)
     count = 0
     time_array = []
-    while True and count < 200:
+    while True and count < 20:
         res, frame = camera.read()
         if count%2==0:
             vout.write(np.array(frame))
@@ -109,10 +115,10 @@ def detect_video(video, interpreter, imgsz, data, conf):
             break
 
         image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False, conf)
-        print(image.shape)
         time_array.append(time)
         count += 1
-        # cv2.imshow("detection", image)
+        if platform == "darwin" or platform =="win32":
+            cv2.imshow("detection", image)
 
         # Save the video frame by frame
         vout.write(image)
@@ -129,19 +135,24 @@ def detect_video(video, interpreter, imgsz, data, conf):
 def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, data="datasets/LPCV.yaml", conf=0.25):
     model_path, source, imgsz, data= opt.weights, opt.source, opt.imgsz, opt.data
     data = get_data_dict(data)['names']
-    interpreter = tflite.Interpreter(model_path)
-    interpreter = tflite.Interpreter(model_path, experimental_delegates=[tflite.load_delegate("libedgetpu.so.1")])
-    # import tensorflow as tf
-
-    # interpreter = tf.lite.Interpreter(model_path)
+    spam_loader = importlib.util.find_spec('tflite_runtime')
+    found = spam_loader is not None
+    if found:
+        import tflite_runtime.interpreter as tflite
+        interpreter = tflite.Interpreter(model_path)
+        interpreter = tflite.Interpreter(model_path, experimental_delegates=[tflite.load_delegate("libedgetpu.so.1")])
+    else:
+        import tensorflow as tf
+        interpreter = tf.lite.Interpreter(model_path)
     interpreter.allocate_tensors()
     
     if source.endswith("jpg") or source.endswith("jpeg"):
         image = Image.open(source)
         new_image, time = detect_image(image, interpreter, imgsz, data, source, conf)
-        # cv2.namedWindow("image", cv2.WINDOW_AUTOSIZE)
-        # cv2.imshow("image", new_image)
-        # cv2.waitKey(0)
+        if platform == "darwin" or platform =="win32":
+            cv2.namedWindow("image", cv2.WINDOW_AUTOSIZE)
+            cv2.imshow("image", new_image)
+            cv2.waitKey(0)
         cv2.imwrite(source[:len(source)-4]+"Output.jpg", new_image)
     elif source.endswith("m4v") or source.endswith("mp4"): 
         video = source
