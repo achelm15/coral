@@ -67,7 +67,6 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     y[..., 3] *= h  # h
     start2 = datetime.datetime.now()
     pred = process_outs(y, conf_thres = conf)
-    print("NEW", datetime.datetime.now()-start2)
     pred[:, :4] = scale_coords(test_img.shape[1:3], pred[:, :4], test_img0.shape).round()
     results = np.unique(pred[:,5], return_counts=True)
     results = ([(data[int(i)]+"s") for i in results[0]], results[1])
@@ -77,6 +76,8 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
             result_s+=str(int(results[1][x])) + " " + results[0][x] + ", "
         else:
             result_s+=str(int(results[1][x])) + " " + results[0][x]
+    
+    print("NEW", datetime.datetime.now()-start2)
     print(result_s)
     print(time)
     boxes = pred[:,:4]
