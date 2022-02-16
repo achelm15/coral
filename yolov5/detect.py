@@ -65,7 +65,9 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     y[..., 1] *= h  # y
     y[..., 2] *= w  # w
     y[..., 3] *= h  # h
+    start2 = datetime.datetime.now()
     pred = process_outs(y, conf_thres = conf)
+    print(datetime.datetime.now()-start2)
     pred[:, :4] = scale_coords(test_img.shape[1:3], pred[:, :4], test_img0.shape).round()
     results = np.unique(pred[:,5], return_counts=True)
     results = ([(data[int(i)]+"s") for i in results[0]], results[1])
