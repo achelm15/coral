@@ -33,13 +33,11 @@ def draw(image, boxes, scores, classes, all_classes):
                     cv2.LINE_AA)
 
         print(' box coordinate x,y,w,h: {0} '.format(box) + 'class: {0}, score: {1:.2f}'.format(all_classes[int(cl)], score) )
-        # print('box coordinate x,y,w,h: {0}'.format(box))
 
 
-def detect_image(image, interpreter, imgsz, data, pathname):
+def detect_image(image, interpreter, imgsz, data, pathname, conf):
     if pathname:
         test_img0 = cv2.imread(pathname)
-        print(test_img0.shape)
     else: 
         test_img0 = np.array(image)
     test_img = letterbox(test_img0, imgsz, stride=64, auto=False)[0]
@@ -63,7 +61,7 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     y[..., 1] *= h  # y
     y[..., 2] *= w  # w
     y[..., 3] *= h  # h
-    pred = process_outs(y)
+    pred = process_outs(y, conf_thres = conf)
     pred[:, :4] = scale_coords(test_img.shape[1:3], pred[:, :4], test_img0.shape).round()
     results = np.unique(pred[:,5], return_counts=True)
     results = ([(data[int(i)]+"s") for i in results[0]], results[1])
@@ -84,11 +82,9 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     return test_img0, time
 
 
-def detect_video(video, interpreter, imgsz, data):
-    # camera = cv2.VideoCapture(os.path.join(video))
-    camera = cv2.VideoCapture(0)
+def detect_video(video, interpreter, imgsz, data, conf):
+    camera = cv2.VideoCapture(video)
     fps = camera.get(cv2.CAP_PROP_FPS)
-    print(fps, "ASDFASDFASDFASDFASDFASDFASDF")
 
     cv2.namedWindow("detection", cv2.WINDOW_NORMAL)
 
@@ -111,7 +107,7 @@ def detect_video(video, interpreter, imgsz, data):
         if not res:
             break
 
-        image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False)
+        image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False, conf)
         print(image.shape)
         time_array.append(time)
         count += 1
@@ -129,26 +125,26 @@ def detect_video(video, interpreter, imgsz, data):
     print(np.mean(time_array))
 
 
-def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, data="datasets/LPCV.yaml"):
+def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, data="datasets/LPCV.yaml", conf=0.25):
     model_path, source, imgsz, data= opt.weights, opt.source, opt.imgsz, opt.data
     data = get_data_dict(data)['names']
     interpreter = tflite.Interpreter(model_path)
     interpreter = tflite.Interpreter(model_path, experimental_delegates=[tflite.load_delegate("libedgetpu.so.1")])
     # import tensorflow as tf
 
-    interpreter = tf.lite.Interpreter(model_path)
+    # interpreter = tf.lite.Interpreter(model_path)
     interpreter.allocate_tensors()
     
     if source.endswith("jpg") or source.endswith("jpeg"):
         image = Image.open(source)
-        new_image = detect_image(image, interpreter, imgsz, data, source)
+        new_image, time = detect_image(image, interpreter, imgsz, data, source, conf)
         cv2.namedWindow("image", cv2.WINDOW_AUTOSIZE)
         cv2.imshow("image", new_image)
         cv2.waitKey(0)
         cv2.imwrite(source[:len(source)-4]+"Output.jpg", new_image)
     elif source.endswith("m4v") or source.endswith("mp4"): 
         video = source
-        detect_video(video, interpreter, imgsz, data)
+        detect_video(video, interpreter, imgsz, data, conf)
     else:
         return
 
@@ -163,6 +159,7 @@ def parse_opt():
     parser.add_argument("--source", type=str,default=ROOT / "./sources/test.jpg",)
     parser.add_argument("--imgsz", type=int, default=256)
     parser.add_argument('--data', type=str, default=ROOT / 'datasets/LPCV.yaml', help='dataset.yaml path')
+    parser.add_argument('--conf', type=float, default=0.25)
     opt = parser.parse_args()
     return opt
 
