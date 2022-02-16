@@ -1,4 +1,4 @@
-# import tflite_runtime.interpreter as tflite
+import tflite_runtime.interpreter as tflite
 from PIL import Image
 import datetime
 import numpy as np
@@ -132,9 +132,9 @@ def detect_video(video, interpreter, imgsz, data):
 def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, data="datasets/LPCV.yaml"):
     model_path, source, imgsz, data= opt.weights, opt.source, opt.imgsz, opt.data
     data = get_data_dict(data)['names']
-    # interpreter = tflite.Interpreter(model_path)
-    # interpreter = tflite.Interpreter(model_path, experimental_delegates=[tflite.load_delegate("libedgetpu.so.1")])
-    import tensorflow as tf
+    interpreter = tflite.Interpreter(model_path)
+    interpreter = tflite.Interpreter(model_path, experimental_delegates=[tflite.load_delegate("libedgetpu.so.1")])
+    # import tensorflow as tf
 
     interpreter = tf.lite.Interpreter(model_path)
     interpreter.allocate_tensors()
