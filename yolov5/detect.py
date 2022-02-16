@@ -111,7 +111,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
         print(image.shape)
         time_array.append(time)
         count += 1
-        cv2.imshow("detection", image)
+        # cv2.imshow("detection", image)
 
         # Save the video frame by frame
         vout.write(image)
@@ -121,7 +121,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
 
     vout.release()
     camera.release()
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
     print(np.mean(time_array))
 
 
