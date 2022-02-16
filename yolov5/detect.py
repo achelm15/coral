@@ -57,9 +57,13 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     test_img = np.array([test_img]).transpose(0, 2, 3, 1)
     interpreter.set_tensor(input['index'], test_img)
     print("NEWEST: ",datetime.datetime.now() - start4)
+
+
     start = datetime.datetime.now()
     interpreter.invoke()
     time = datetime.datetime.now() - start
+
+
     y = interpreter.get_tensor(output['index'])
     scale, zero_point = output['quantization']
     y = (y.astype(np.float32) - zero_point) * scale  # re-scale
@@ -67,6 +71,8 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     y[..., 1] *= h  # y
     y[..., 2] *= w  # w
     y[..., 3] *= h  # h
+
+
     start2 = datetime.datetime.now()
     pred = process_outs(y, conf_thres = conf)
     pred[:, :4] = scale_coords(test_img.shape[1:3], pred[:, :4], test_img0.shape).round()
@@ -80,16 +86,22 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
             result_s+=str(int(results[1][x])) + " " + results[0][x]
     
     print("NEW", datetime.datetime.now()-start2)
+
+
     print(result_s)
     print(time)
     boxes = pred[:,:4]
     shape = test_img0.shape
     scores = pred[:,4]
     classes = pred[:,5].astype("uint8")
+
+
     start3 = datetime.datetime.now()
     if boxes is not None:
         draw(test_img0, boxes, scores, classes, data)
     print("NEWISH", datetime.datetime.now()-start3)
+
+    
     time1 = datetime.datetime.now() - start1
     print("Larger time: ", time1)
     return test_img0, time
