@@ -50,11 +50,13 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     _, h, w = test_img.shape
     test_img = test_img.astype("float64")
     test_img /= 255
+    start4 = datetime.datetime.now()
     input, output = interpreter.get_input_details()[0], interpreter.get_output_details()[0]
     scale, zero_point = input['quantization']
     test_img = (test_img / scale + zero_point).astype(np.uint8)  # de-scale
     test_img = np.array([test_img]).transpose(0, 2, 3, 1)
     interpreter.set_tensor(input['index'], test_img)
+    print("NEWEST: ",datetime.datetime.now() - start4)
     start = datetime.datetime.now()
     interpreter.invoke()
     time = datetime.datetime.now() - start
