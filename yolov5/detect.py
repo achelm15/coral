@@ -87,8 +87,9 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
 
 def detect_video(video, interpreter, imgsz, data, conf):
     camera = cv2.VideoCapture(video)
+    show = platform == "darwin" or platform =="win32"
     fps = camera.get(cv2.CAP_PROP_FPS)
-    if platform == "darwin" or platform =="win32":
+    if show:
         cv2.namedWindow("detection", cv2.WINDOW_NORMAL)
 
     # Prepare for saving the detected video
@@ -118,7 +119,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
         image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False, conf)
         time_array.append(time)
         count += 1
-        if platform == "darwin" or platform =="win32":
+        if show:
             cv2.imshow("detection", image)
 
         # Save the video frame by frame
