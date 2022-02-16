@@ -39,13 +39,14 @@ def draw(image, boxes, scores, classes, all_classes):
 
 
 def detect_image(image, interpreter, imgsz, data, pathname, conf):
+    start1 = datetime.datetime.now()
     if pathname:
         test_img0 = cv2.imread(pathname)
     else: 
         test_img0 = np.array(image)
-    test_img = letterbox(test_img0, imgsz, stride=64, auto=False)[0]
-    test_img = test_img.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
-    test_img = np.ascontiguousarray(test_img)
+    test_img = np.ascontiguousarray(letterbox(test_img0, imgsz, stride=64, auto=False)[0].transpose((2, 0, 1))[::-1])
+    # test_img = test_img.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
+    # test_img = np.ascontiguousarray(test_img)
     _, h, w = test_img.shape
     test_img = test_img.astype("float64")
     test_img /= 255
@@ -82,6 +83,8 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     classes = pred[:,5].astype("uint8")
     if boxes is not None:
         draw(test_img0, boxes, scores, classes, data)
+    time1 = datetime.datetime.now() - start1
+    print("Larger time: ", time1)
     return test_img0, time
 
 
@@ -130,7 +133,8 @@ def detect_video(video, interpreter, imgsz, data, conf):
 
     vout.release()
     camera.release()
-    # cv2.destroyAllWindows()
+    if show:
+        cv2.destroyAllWindows()
     print(np.mean(time_array))
 
 
