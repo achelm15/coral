@@ -1,4 +1,4 @@
-import tflite_runtime.interpreter as tflite
+# import tflite_runtime.interpreter as tflite
 from PIL import Image
 import datetime
 import numpy as np
@@ -7,7 +7,7 @@ import os
 import sys
 from pathlib import Path
 import cv2
-from general import process_outs, process_image, get_data_dict, scale_coords, Annotator, colors
+from general import process_outs, get_data_dict, scale_coords, letterbox
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -17,22 +17,13 @@ ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 
 def draw(image, boxes, scores, classes, all_classes):
-    """Draw the boxes on the image.
-
-    # Argument:
-        image: original image.
-        boxes: ndarray, boxes of objects.
-        classes: ndarray, classes of objects.
-        scores: ndarray, scores of objects.
-        all_classes: all classes name.
-    """
     for box, score, cl in zip(boxes, scores, classes):
-        x, y, w, h = box
+        x1, y1, x2, y2 = box
 
-        top = max(0, np.floor(x + 0.5).astype(int))
-        left = max(0, np.floor(y + 0.5).astype(int))
-        right = min(image.shape[1], np.floor(x + w + 0.5).astype(int))
-        bottom = min(image.shape[0], np.floor(y + h + 0.5).astype(int))
+        top = max(0, np.floor(x1 + 0.5).astype(int))
+        left = max(0, np.floor(y1 + 0.5).astype(int))
+        right = max(0, np.floor(x2 + 0.5).astype(int))
+        bottom = max(0, np.floor(y2 + 0.5).astype(int))
 
         cv2.rectangle(image, (top, left), (right, bottom), (255, 0, 0), 2)
         cv2.putText(image, '{0} {1:.2f}'.format(all_classes[int(cl)], score),
@@ -44,30 +35,32 @@ def draw(image, boxes, scores, classes, all_classes):
         print('class: {0}, score: {1:.2f}'.format(all_classes[int(cl)], score))
         print('box coordinate x,y,w,h: {0}'.format(box))
 
-    print()
-
 
 def detect_image(image, interpreter, imgsz, data, pathname):
-    pimage = process_image(image,imgsz)
-    im0 = np.array(image)
-    img = pimage
-    input_index = interpreter.get_input_details()[0]["index"]
-    output_index = interpreter.get_output_details()[0]["index"]
-    interpreter.set_tensor(input_index, np.array(pimage, dtype="uint8"))
+    test_img0 = cv2.imread(pathname)
+    test_img = letterbox(test_img0, imgsz, stride=64, auto=False)[0]
+    test_img = test_img.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
+    test_img = np.ascontiguousarray(test_img)
+    _, h, w = test_img.shape
+    test_img = test_img.astype("float64")
+    test_img /= 255
+    input, output = interpreter.get_input_details()[0], interpreter.get_output_details()[0]
+    scale, zero_point = input['quantization']
+    test_img = (test_img / scale + zero_point).astype(np.uint8)  # de-scale
+    test_img = np.array([test_img]).transpose(0, 2, 3, 1)
+    interpreter.set_tensor(input['index'], test_img)
     start = datetime.datetime.now()
     interpreter.invoke()
     time = datetime.datetime.now() - start
-    outs = interpreter.get_tensor(output_index)
-    outs = [np.array(outs)]
-    scale, zero_point = interpreter.get_output_details()[0]["quantization"]
-    pred = (outs[0].astype(np.float32) - zero_point) * scale  # re-scale
-    pred[..., 0] *= imgsz  # x
-    pred[..., 1] *= imgsz  # y
-    pred[..., 2] *= imgsz  # w
-    pred[..., 3] *= imgsz  # h
-    
-    pred = process_outs(pred)
-    print(pred)
+    y = interpreter.get_tensor(output['index'])
+    scale, zero_point = output['quantization']
+    y = (y.astype(np.float32) - zero_point) * scale  # re-scale
+    y[..., 0] *= w  # x
+    y[..., 1] *= h  # y
+    y[..., 2] *= w  # w
+    y[..., 3] *= h  # h
+    pred = process_outs(y)
+    pred[:, :4] = scale_coords(test_img.shape[1:3], pred[:, :4], test_img0.shape).round()
     results = np.unique(pred[:,5], return_counts=True)
     results = ([(data[int(i)]+"s") for i in results[0]], results[1])
     result_s = "Found: "
@@ -78,40 +71,13 @@ def detect_image(image, interpreter, imgsz, data, pathname):
             result_s+=str(int(results[1][x])) + " " + results[0][x]
     print(result_s)
     print(time)
-    
     boxes = pred[:,:4]
-    image = cv2.imread(pathname)
-    shape = image.shape
-    width, height = shape[1]/256, shape[0]/256
-    image_dims = [width, height, width, height]
-    boxes = boxes * image_dims
+    shape = test_img0.shape
     scores = pred[:,4]
-    classes = pred[:,5]
+    classes = pred[:,5].astype("uint8")
     if boxes is not None:
-        draw(image, boxes, scores, classes, data)
-    return image
-
-
-    # print(pred)
-    # det = pred
-    # print(img.shape)
-    # print(im0.shape)
-    # print(img.shape[1:3])
-    # print(det)
-    # print(det[:,:4])
-    # det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
-    # print(det)
-    # annotator = Annotator(im0, line_width=3, example=str(data))
-    # for *xyxy, conf, cls in reversed(det):
-    #     c = int(cls)  # integer class
-    #     label = data[c]
-    #     print(xyxy)
-    #     annotator.box_label(xyxy, label, color=colors(c, True))
-    # im0 = annotator.result()
-    # if True:
-    #     print("asdfas")
-    #     cv2.imwrite(pathname[len(pathname)-5:]+"test.jpg", im0)
-    return outs, time
+        draw(test_img0, boxes, scores, classes, data)
+    return test_img0
 
 
 def detect_video(video, interpreter, imgsz, data):
@@ -131,19 +97,20 @@ def detect_video(video, interpreter, imgsz, data):
 def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, data="datasets/LPCV.yaml"):
     model_path, source, imgsz, data= opt.weights, opt.source, opt.imgsz, opt.data
     data = get_data_dict(data)['names']
-    interpreter = tflite.Interpreter(model_path)
-    interpreter = tflite.Interpreter(model_path, experimental_delegates=[tflite.load_delegate("libedgetpu.so.1")])
-    # import tensorflow as tf
+    # interpreter = tflite.Interpreter(model_path)
+    # interpreter = tflite.Interpreter(model_path, experimental_delegates=[tflite.load_delegate("libedgetpu.so.1")])
+    import tensorflow as tf
 
-    # interpreter = tf.lite.Interpreter(model_path)
-    # print(type(interpreter))
-
+    interpreter = tf.lite.Interpreter(model_path)
     interpreter.allocate_tensors()
     
     if source.endswith("jpg") or source.endswith("jpeg"):
         image = Image.open(source)
         new_image = detect_image(image, interpreter, imgsz, data, source)
-        cv2.imwrite(source[:len(source)-5]+"456test.jpg", new_image)
+        cv2.namedWindow("image", cv2.WINDOW_AUTOSIZE)
+        cv2.imshow("image", new_image)
+        cv2.waitKey(0)
+        cv2.imwrite(source[:len(source)-4]+"Output.jpg", new_image)
     elif source.endswith("m4v") or source.endswith("mp4"): 
         video = source
         detect_video(video, interpreter, imgsz, data)
