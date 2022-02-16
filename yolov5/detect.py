@@ -32,12 +32,16 @@ def draw(image, boxes, scores, classes, all_classes):
                     0.6, (0, 0, 255), 1,
                     cv2.LINE_AA)
 
-        print('class: {0}, score: {1:.2f}'.format(all_classes[int(cl)], score))
-        print('box coordinate x,y,w,h: {0}'.format(box))
+        print(' box coordinate x,y,w,h: {0} '.format(box) + 'class: {0}, score: {1:.2f}'.format(all_classes[int(cl)], score) )
+        # print('box coordinate x,y,w,h: {0}'.format(box))
 
 
 def detect_image(image, interpreter, imgsz, data, pathname):
-    test_img0 = cv2.imread(pathname)
+    if pathname:
+        test_img0 = cv2.imread(pathname)
+        print(test_img0.shape)
+    else: 
+        test_img0 = np.array(image)
     test_img = letterbox(test_img0, imgsz, stride=64, auto=False)[0]
     test_img = test_img.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
     test_img = np.ascontiguousarray(test_img)
@@ -77,21 +81,52 @@ def detect_image(image, interpreter, imgsz, data, pathname):
     classes = pred[:,5].astype("uint8")
     if boxes is not None:
         draw(test_img0, boxes, scores, classes, data)
-    return test_img0
+    return test_img0, time
 
 
 def detect_video(video, interpreter, imgsz, data):
-    vidcap = cv2.VideoCapture(video)
-    success, image = vidcap.read()
+    # camera = cv2.VideoCapture(os.path.join(video))
+    camera = cv2.VideoCapture(0)
+    fps = camera.get(cv2.CAP_PROP_FPS)
+    print(fps, "ASDFASDFASDFASDFASDFASDFASDF")
+
+    cv2.namedWindow("detection", cv2.WINDOW_NORMAL)
+
+    # Prepare for saving the detected video
+    sz = (int(camera.get(cv2.CAP_PROP_FRAME_WIDTH)),
+        int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    fourcc = cv2.VideoWriter_fourcc('m','p','4','v')
+
+    vout = cv2.VideoWriter()
+    vout.open("OutPut"+video, fourcc, fps, sz, True)
     count = 0
     time_array = []
-    while success and count<20:
-        outs, time = detect_image(Image.fromarray(image), interpreter, imgsz, data)
+    while True:
+        res, frame = camera.read()
+        if count%2==0:
+            vout.write(np.array(frame))
+            count = count + 1
+            continue
+
+        if not res:
+            break
+
+        image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False)
+        print(image.shape)
         time_array.append(time)
-        success, image = vidcap.read()
         count += 1
-    print(np.mean(np.array(time_array)))
-    return
+        cv2.imshow("detection", image)
+
+        # Save the video frame by frame
+        vout.write(image)
+
+        if cv2.waitKey(110) & 0xff == 27:
+                break
+
+    vout.release()
+    camera.release()
+    cv2.destroyAllWindows()
+    print(np.mean(time_array))
 
 
 def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, data="datasets/LPCV.yaml"):
