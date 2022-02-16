@@ -94,7 +94,8 @@ def detect_video(video, interpreter, imgsz, data, conf):
     fourcc = cv2.VideoWriter_fourcc('m','p','4','v')
 
     vout = cv2.VideoWriter()
-    vout.open("OutPut"+video, fourcc, fps, sz, True)
+    out = video.split('/')[1]
+    vout.open("OutPut"+out, fourcc, fps, sz, True)
     count = 0
     time_array = []
     while True and count < 200:
