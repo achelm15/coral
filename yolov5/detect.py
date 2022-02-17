@@ -44,8 +44,6 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     else: 
         test_img0 = np.array(image)
     test_img = np.ascontiguousarray(letterbox(test_img0, imgsz, stride=64, auto=False)[0].transpose((2, 0, 1))[::-1])
-    # test_img = test_img.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
-    # test_img = np.ascontiguousarray(test_img)
     _, h, w = test_img.shape
     test_img = test_img.astype("float64")
     test_img /= 255
@@ -84,14 +82,14 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
 
     print(result_s)
     print(time)
-    boxes = pred[:,:4]
-    scores = pred[:,4]
-    classes = pred[:,5].astype("uint8")
+    # boxes = pred[:,:4]
+    # scores = pred[:,4]
+    # classes = pred[:,5].astype("uint8")
 
 
 
-    if boxes is not None:
-        draw(test_img0, boxes, scores, classes, data)
+    if pred[:,4] is not None:
+        draw(test_img0, pred[:,:4], pred[:,4], pred[:,5].astype("uint8"), data)
 
     return test_img0, time
 
@@ -119,9 +117,11 @@ def detect_video(video, interpreter, imgsz, data, conf):
     time_array = []
     total_det = []
     total_write = []
+    frame_rate = []
     while True and count< 50:
         print(count)
         res, frame = camera.read()
+        frame_start = datetime.datetime.now()
         if count%2==0:
             time1 = datetime.datetime.now()
             image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False, conf)
@@ -143,7 +143,8 @@ def detect_video(video, interpreter, imgsz, data, conf):
             # vout.write(np.array(frame))
             count = count + 1
             continue
-
+        frame_end = datetime.datetime.now()-frame_start
+        frame_rate.append(frame_end)
         if not res:
             break
         
@@ -158,6 +159,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
     print(np.mean(time_array))
     print(np.mean(total_det))
     print(np.mean(total_write))
+    print(np.mean(frame_rate))
 
 
 def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, data="datasets/LPCV.yaml", conf=0.25):
