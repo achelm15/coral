@@ -39,7 +39,6 @@ def draw(image, boxes, scores, classes, all_classes):
 
 
 def detect_image(image, interpreter, imgsz, data, pathname, conf):
-    start1 = datetime.datetime.now()
     if pathname:
         test_img0 = cv2.imread(pathname)
     else: 
@@ -50,13 +49,11 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     _, h, w = test_img.shape
     test_img = test_img.astype("float64")
     test_img /= 255
-    start4 = datetime.datetime.now()
     input, output = interpreter.get_input_details()[0], interpreter.get_output_details()[0]
     scale, zero_point = input['quantization']
     test_img = (test_img / scale + zero_point).astype(np.uint8)  # de-scale
     test_img = np.array([test_img]).transpose(0, 2, 3, 1)
     interpreter.set_tensor(input['index'], test_img)
-    print("NEWEST: ",datetime.datetime.now() - start4)
 
 
     start = datetime.datetime.now()
@@ -73,7 +70,6 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     y[..., 3] *= h  # h
 
 
-    start2 = datetime.datetime.now()
     pred = process_outs(y, conf_thres = conf)
     pred[:, :4] = scale_coords(test_img.shape[1:3], pred[:, :4], test_img0.shape).round()
     results = np.unique(pred[:,5], return_counts=True)
@@ -84,26 +80,19 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
             result_s+=str(int(results[1][x])) + " " + results[0][x] + ", "
         else:
             result_s+=str(int(results[1][x])) + " " + results[0][x]
-    
-    print("NEW", datetime.datetime.now()-start2)
 
 
     print(result_s)
     print(time)
     boxes = pred[:,:4]
-    shape = test_img0.shape
     scores = pred[:,4]
     classes = pred[:,5].astype("uint8")
 
 
-    start3 = datetime.datetime.now()
+
     if boxes is not None:
         draw(test_img0, boxes, scores, classes, data)
-    print("NEWISH", datetime.datetime.now()-start3)
 
-
-    time1 = datetime.datetime.now() - start1
-    print("Larger time: ", time1)
     return test_img0, time
 
 
@@ -117,14 +106,14 @@ def detect_video(video, interpreter, imgsz, data, conf):
     # Prepare for saving the detected video
     sz = (int(camera.get(cv2.CAP_PROP_FRAME_WIDTH)),
         int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-    fourcc = cv2.VideoWriter_fourcc(*'mpeg')
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
     vout = cv2.VideoWriter()
     out = video.split('/')
     if len(out)==2:
-        out = out[1]
+        out = out[1][:len(out[1])-4]+".mp4"
     else:
-        out = out[0]
+        out = out[0][:len(out[0])-4]+".mp4"
     vout.open("OutPut"+out, fourcc, 20, sz, True)
     count = 0
     time_array = []
@@ -132,7 +121,9 @@ def detect_video(video, interpreter, imgsz, data, conf):
         print(count)
         res, frame = camera.read()
         if count%3==0:
+            time1 = datetime.datetime.now()
             image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False, conf)
+            print("TOTAL DETECTION", datetime.datetime.now()-time1)
             time_array.append(time)
             count += 1
             if show:
