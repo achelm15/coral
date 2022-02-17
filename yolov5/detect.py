@@ -122,7 +122,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
     while True and count< 50:
         print(count)
         res, frame = camera.read()
-        if count%3==0:
+        if count%2==0:
             time1 = datetime.datetime.now()
             image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False, conf)
             end1 = datetime.datetime.now()-time1
@@ -135,7 +135,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
 
             # Save the video frame by frame
             time1 = datetime.datetime.now()
-            vout.write(image)
+            # vout.write(image)
             end1 = datetime.datetime.now()-time1
             print("IMAGE WRITE TIME: ", end1)
             total_write.append(end1)
