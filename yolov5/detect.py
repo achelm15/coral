@@ -101,7 +101,7 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
         draw(test_img0, boxes, scores, classes, data)
     print("NEWISH", datetime.datetime.now()-start3)
 
-    
+
     time1 = datetime.datetime.now() - start1
     print("Larger time: ", time1)
     return test_img0, time
@@ -128,7 +128,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
     vout.open("OutPut"+out, fourcc, fps, sz, True)
     count = 0
     time_array = []
-    while True:
+    while True < 300:
         res, frame = camera.read()
         if count%2==0:
             vout.write(np.array(frame))
