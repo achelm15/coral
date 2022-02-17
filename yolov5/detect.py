@@ -128,15 +128,9 @@ def detect_video(video, interpreter, imgsz, data, conf):
     vout.open("OutPut"+out, fourcc, 20, sz, True)
     count = 0
     time_array = []
-    while True < 50:
+    while True and count< 50:
+        print(count)
         res, frame = camera.read()
-        if count%2==0:
-            # vout.write(np.array(frame))
-            count = count + 1
-            continue
-
-        if not res:
-            break
         if count%3==0:
             image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False, conf)
             time_array.append(time)
@@ -146,6 +140,14 @@ def detect_video(video, interpreter, imgsz, data, conf):
 
             # Save the video frame by frame
             vout.write(image)
+        else:
+            # vout.write(np.array(frame))
+            count = count + 1
+            continue
+
+        if not res:
+            break
+        
 
         if cv2.waitKey(110) & 0xff == 27:
                 break
