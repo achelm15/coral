@@ -117,20 +117,28 @@ def detect_video(video, interpreter, imgsz, data, conf):
     vout.open("OutPut"+out, fourcc, 20, sz, True)
     count = 0
     time_array = []
+    total_det = []
+    total_write = []
     while True and count< 50:
         print(count)
         res, frame = camera.read()
         if count%3==0:
             time1 = datetime.datetime.now()
             image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False, conf)
-            print("TOTAL DETECTION", datetime.datetime.now()-time1)
+            end1 = datetime.datetime.now()-time1
+            print("TOTAL DETECTION: ", end1)
+            total_det.append(end1)
             time_array.append(time)
             count += 1
             if show:
                 cv2.imshow("detection", image)
 
             # Save the video frame by frame
+            time1 = datetime.datetime.now()
             vout.write(image)
+            end1 = datetime.datetime.now()-time1
+            print("IMAGE WRITE TIME: ", end1)
+            total_write.append(end1)
         else:
             # vout.write(np.array(frame))
             count = count + 1
@@ -148,6 +156,8 @@ def detect_video(video, interpreter, imgsz, data, conf):
     if show:
         cv2.destroyAllWindows()
     print(np.mean(time_array))
+    print(np.mean(total_det))
+    print(np.mean(total_write))
 
 
 def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, data="datasets/LPCV.yaml", conf=0.25):
