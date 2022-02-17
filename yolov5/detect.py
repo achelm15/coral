@@ -159,7 +159,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
     print(np.mean(time_array))
     print(np.mean(total_det))
     print(np.mean(total_write))
-    print(1/np.mean(frame_rate))
+    print(np.mean(frame_rate))
 
 
 def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, data="datasets/LPCV.yaml", conf=0.25):
