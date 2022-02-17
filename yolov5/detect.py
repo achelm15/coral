@@ -117,7 +117,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
     # Prepare for saving the detected video
     sz = (int(camera.get(cv2.CAP_PROP_FRAME_WIDTH)),
         int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-    fourcc = cv2.VideoWriter_fourcc('m','p','4','v')
+    fourcc = cv2.VideoWriter_fourcc(*'mpeg')
 
     vout = cv2.VideoWriter()
     out = video.split('/')
@@ -125,27 +125,27 @@ def detect_video(video, interpreter, imgsz, data, conf):
         out = out[1]
     else:
         out = out[0]
-    vout.open("OutPut"+out, fourcc, fps, sz, True)
+    vout.open("OutPut"+out, fourcc, 20, sz, True)
     count = 0
     time_array = []
-    while True < 300:
+    while True < 50:
         res, frame = camera.read()
         if count%2==0:
-            vout.write(np.array(frame))
+            # vout.write(np.array(frame))
             count = count + 1
             continue
 
         if not res:
             break
+        if count%3==0:
+            image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False, conf)
+            time_array.append(time)
+            count += 1
+            if show:
+                cv2.imshow("detection", image)
 
-        image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False, conf)
-        time_array.append(time)
-        count += 1
-        if show:
-            cv2.imshow("detection", image)
-
-        # Save the video frame by frame
-        vout.write(image)
+            # Save the video frame by frame
+            vout.write(image)
 
         if cv2.waitKey(110) & 0xff == 27:
                 break
