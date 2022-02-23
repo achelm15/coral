@@ -40,12 +40,18 @@ def draw(image, boxes, scores, classes, all_classes):
 
 
 def detect_image(image, interpreter, imgsz, data, pathname, conf):
-    time4 = datetime.datetime.now()
+    
     if pathname:
+        time4 = datetime.datetime.now()
         test_img0 = cv2.imread(pathname)
+        print("SETUP ONLY LETTERBOX: ",datetime.datetime.now()-time4)
     else: 
-        test_img0 = np.array(image)
+        time4 = datetime.datetime.now()
+        test_img0 = np.asarray(image)
+        print("SETUP ONLY READ IMAGE: ",datetime.datetime.now()-time4)
+    
     test_img = np.ascontiguousarray(letterbox(test_img0, imgsz, stride=64, auto=False)[0].transpose((2, 0, 1))[::-1])
+    
     _, h, w = test_img.shape
     test_img = test_img.astype(np.float32)[None]
     test_img /= 255
@@ -62,7 +68,7 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     test_img = (test_img / scale + zero_point).astype(np.uint8)  # de-scale
     test_img = torch.from_numpy(test_img).to('cpu').permute(0,2,3,1).cpu().numpy()
     interpreter.set_tensor(io[0]['index'], test_img)
-    print("SETUP: ",datetime.datetime.now()-time4)
+    
 
 
     start = datetime.datetime.now()
