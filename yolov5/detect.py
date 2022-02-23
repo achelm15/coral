@@ -121,7 +121,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
         print(count)
         res, frame = camera.read()
         frame_start = datetime.datetime.now()
-        if count%2==0:
+        if count%2!=-1:
             time1 = datetime.datetime.now()
             image, time = detect_image(frame, interpreter, imgsz, data, False, conf)
             end1 = datetime.datetime.now()-time1
@@ -138,10 +138,10 @@ def detect_video(video, interpreter, imgsz, data, conf):
             end1 = datetime.datetime.now()-time1
             print("IMAGE WRITE TIME: ", end1)
             total_write.append(end1)
-        else:
-            # vout.write(np.array(frame))
-            count = count + 1
-            continue
+        # else:
+        #     # vout.write(np.array(frame))
+        #     count = count + 1
+        #     continue
         frame_end = datetime.datetime.now()-frame_start
         frame_rate.append(frame_end)
         if not res:
