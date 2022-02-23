@@ -123,7 +123,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
         frame_start = datetime.datetime.now()
         if count%2==0:
             time1 = datetime.datetime.now()
-            image, time = detect_image(Image.fromarray(np.array(frame)), interpreter, imgsz, data, False, conf)
+            image, time = detect_image(Image.fromarray(np.asarray(frame)), interpreter, imgsz, data, False, conf)
             end1 = datetime.datetime.now()-time1
             print("TOTAL DETECTION: ", end1)
             total_det.append(end1)
