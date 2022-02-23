@@ -40,15 +40,11 @@ def draw(image, boxes, scores, classes, all_classes):
 
 
 def detect_image(image, interpreter, imgsz, data, pathname, conf):
-    
+    time4 = datetime.datetime.now()
     if pathname:
-        time4 = datetime.datetime.now()
         test_img0 = cv2.imread(pathname)
-        print("SETUP ONLY LETTERBOX: ",datetime.datetime.now()-time4)
     else: 
-        time4 = datetime.datetime.now()
         test_img0 = np.asarray(image)
-        print("SETUP ONLY READ IMAGE: ",datetime.datetime.now()-time4)
     
     test_img = np.ascontiguousarray(letterbox(test_img0, imgsz, stride=64, auto=False)[0].transpose((2, 0, 1))[::-1])
     
@@ -68,6 +64,7 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     test_img = (test_img / scale + zero_point).astype(np.uint8)  # de-scale
     test_img = torch.from_numpy(test_img).to('cpu').permute(0,2,3,1).cpu().numpy()
     interpreter.set_tensor(io[0]['index'], test_img)
+    print("SETUP ONLY LETTERBOX: ",datetime.datetime.now()-time4)
     
 
 
@@ -136,7 +133,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
         res, frame = camera.read()
         frame_start = datetime.datetime.now()
         time1 = datetime.datetime.now()
-        image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False, conf)
+        image, time = detect_image(frame, interpreter, imgsz, data, False, conf)
         end1 = datetime.datetime.now()-time1
         print("TOTAL DETECTION: ", end1)
         total_det.append(end1)
