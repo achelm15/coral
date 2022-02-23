@@ -117,20 +117,13 @@ def detect_video(video, interpreter, imgsz, data, conf):
     total_det = []
     total_write = []
     frame_rate = []
-    while True and count< 1:
+    while True and count< 500:
         print(count)
         res, frame = camera.read()
         frame_start = datetime.datetime.now()
         if count%2==0:
             time1 = datetime.datetime.now()
-            f = np.asarray(frame)
-            print(type(frame))
-            print(frame)
-            print(f)
-            print(Image.fromarray(frame))
-            print(Image.fromarray(f))
-
-            image, time = detect_image(Image.fromarray(np.asarray(frame)), interpreter, imgsz, data, False, conf)
+            image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False, conf)
             end1 = datetime.datetime.now()-time1
             print("TOTAL DETECTION: ", end1)
             total_det.append(end1)
