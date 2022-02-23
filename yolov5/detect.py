@@ -117,7 +117,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
 
     vout = cv2.VideoWriter()
     if video==0:
-        out = "captureOutPut.mp4"
+        out = "capture.mp4"
     else:
         out = video.split('/')
     if len(out)==2:
@@ -133,6 +133,8 @@ def detect_video(video, interpreter, imgsz, data, conf):
     while True:
         print(count)
         res, frame = camera.read()
+        if not res:
+            break
         frame_start = datetime.datetime.now()
         time1 = datetime.datetime.now()
         image, time = detect_image(frame, interpreter, imgsz, data, False, conf)
@@ -146,19 +148,17 @@ def detect_video(video, interpreter, imgsz, data, conf):
 
         # Save the video frame by frame
         time1 = datetime.datetime.now()
-        # vout.write(image)
+        vout.write(image)
         end1 = datetime.datetime.now()-time1
         print("IMAGE WRITE TIME: ", end1)
         total_write.append(end1)
         frame_end = datetime.datetime.now()-frame_start
         frame_rate.append(frame_end)
-        if not res:
-            break
+        
         
 
         if cv2.waitKey(110) & 0xff == 27:
                 break
-
     vout.release()
     camera.release()
     if show:
@@ -167,6 +167,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
     print(np.mean(total_det))
     print(np.mean(total_write))
     print(np.mean(frame_rate))
+    return
 
 
 def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, data="datasets/LPCV.yaml", conf=0.25):
