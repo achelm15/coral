@@ -9,6 +9,7 @@ import os
 import sys
 from pathlib import Path
 import cv2
+import torch
 from sys import platform
 from general import process_outs, get_data_dict, scale_coords, letterbox
 
@@ -23,11 +24,11 @@ def draw(image, boxes, scores, classes, all_classes):
     for box, score, cl in zip(boxes, scores, classes):
         x1, y1, x2, y2 = box
 
-        top = max(0, np.floor(x1 + 0.5).astype(int))
-        left = max(0, np.floor(y1 + 0.5).astype(int))
-        right = max(0, np.floor(x2 + 0.5).astype(int))
-        bottom = max(0, np.floor(y2 + 0.5).astype(int))
-
+        top = max(0, torch.floor(x1 + 0.5).int()).item()
+        left = max(0, torch.floor(y1 + 0.5).int()).item()
+        right = max(0, torch.floor(x2 + 0.5).int()).item()
+        bottom = max(0, torch.floor(y2 + 0.5).int()).item()
+        # print(top.item(), left, right, bottom) 
         cv2.rectangle(image, (top, left), (right, bottom), (255, 0, 0), 2)
         cv2.putText(image, '{0} {1:.2f}'.format(all_classes[int(cl)], score),
                     (top, left - 6),
@@ -45,12 +46,19 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
         test_img0 = np.array(image)
     test_img = np.ascontiguousarray(letterbox(test_img0, imgsz, stride=64, auto=False)[0].transpose((2, 0, 1))[::-1])
     _, h, w = test_img.shape
-    test_img = test_img.astype("float64")
+    test_img = test_img.astype(np.float32)
     test_img /= 255
+    # device = torch.device('cpu')
+    # test_img = torch.from_numpy(test_img).to(device)
+    # test_img = test_img.float()  # uint8 to fp16/32
+    # test_img /= 255  # 0 - 255 to 0.0 - 1.0
+    if len(test_img.shape) == 3:
+        test_img = test_img[None]  # expand for batch dim
+    b, ch, h, w = test_img.shape  # batch, channel, height, width
     input, output = interpreter.get_input_details()[0], interpreter.get_output_details()[0]
     scale, zero_point = input['quantization']
     test_img = (test_img / scale + zero_point).astype(np.uint8)  # de-scale
-    test_img = np.array([test_img]).transpose(0, 2, 3, 1)
+    test_img = torch.from_numpy(test_img).to('cpu').permute(0,2,3,1).cpu().numpy()
     interpreter.set_tensor(input['index'], test_img)
 
 
@@ -62,13 +70,9 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     y = interpreter.get_tensor(output['index'])
     scale, zero_point = output['quantization']
     y = (y.astype(np.float32) - zero_point) * scale  # re-scale
-    y[..., 0] *= w  # x
-    y[..., 1] *= h  # y
-    y[..., 2] *= w  # w
-    y[..., 3] *= h  # h
-
-
-    pred = process_outs(y, conf_thres = conf)
+    y[..., :4] *= [w, h, w, h]
+    y = torch.tensor(y) if isinstance(y, np.ndarray) else y
+    pred = process_outs(y, conf_thres = conf)[0]
     pred[:, :4] = scale_coords(test_img.shape[1:3], pred[:, :4], test_img0.shape).round()
     results = np.unique(pred[:,5], return_counts=True)
     results = ([(data[int(i)]+"s") for i in results[0]], results[1])
@@ -82,14 +86,9 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
 
     print(result_s)
     print(time)
-    # boxes = pred[:,:4]
-    # scores = pred[:,4]
-    # classes = pred[:,5].astype("uint8")
-
-
 
     if pred[:,4] is not None:
-        draw(test_img0, pred[:,:4], pred[:,4], pred[:,5].astype("uint8"), data)
+        draw(test_img0, pred[:,:4], pred[:,4], pred[:,5].int(), data)
 
     return test_img0, time
 

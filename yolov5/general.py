@@ -3,6 +3,8 @@ import time
 import yaml
 from pathlib import Path
 import cv2
+import torch
+import torchvision
 
 
 
@@ -54,10 +56,10 @@ def process_outs(prediction, conf_thres=.25, iou_thres=.45, classes=None, agnost
     multi_label &= nc > 1  # multiple labels per box (adds 0.5ms/img)
     merge = False  # use merge-NMS
     t = time.time()
-    output = np.zeros((0,6))*prediction.shape[0]
+    output = [torch.zeros((0, 6), device=prediction.device)] * prediction.shape[0]
     for xi, x in enumerate(prediction):  # image index, image inference
         # Apply constraints
-        # x[((x[..., 2:4] < min_wh) | (x[..., 2:4] > max_wh)).any(1), 4] = 0  # width-height
+        x[((x[..., 2:4] < min_wh) | (x[..., 2:4] > max_wh)).any(1), 4] = 0  # width-height
         x = x[xc[xi]]  # confidence
 
         # If none remain process next image
@@ -65,10 +67,7 @@ def process_outs(prediction, conf_thres=.25, iou_thres=.45, classes=None, agnost
             continue
 
         # Compute conf
-        x = x.astype('float32')
-        x[:, 5:] = x[:, 5:]
-        x[:, 4:5] = x[:, 4:5]
-        x[:, 5:] *= x[:, 4:5] # conf = obj_conf * cls_conf
+        x[:, 5:] *= x[:, 4:5]  # conf = obj_conf * cls_conf
 
         # Box (center x, center y, width, height) to (x1, y1, x2, y2)
         box = xywh2xyxy(x[:, :4])
@@ -76,22 +75,14 @@ def process_outs(prediction, conf_thres=.25, iou_thres=.45, classes=None, agnost
         # Detections matrix nx6 (xyxy, conf, cls)
         if multi_label:
             i, j = (x[:, 5:] > conf_thres).nonzero(as_tuple=False).T
-            x = np.concatenate((box[i], x[i, j + 5, None], j[:, None].float()), 1)
+            x = torch.cat((box[i], x[i, j + 5, None], j[:, None].float()), 1)
         else:  # best class only
-            conf = np.array(x[:,5:]).max(1, keepdims=True)
-            j = np.array([np.array(np.argmax(x[:,5:],1))]).T
-            j = j.astype('float32')
-            x = np.concatenate((box, conf, j), 1)
-            deletions = []
-            for index in range(0,len(x)):
-                test = conf[index]<conf_thres
-                if test[0]:
-                    deletions.append(index)
-            x = np.array([x[item].tolist() for item in range(0,len(x)) if item not in deletions])
+            conf, j = x[:, 5:].max(1, keepdim=True)
+            x = torch.cat((box, conf, j.float()), 1)[conf.view(-1) > conf_thres]
 
         # Filter by class
         if classes is not None:
-            x = x[(x[:, 5:6] == np.array(classes)).any(1)]
+            x = x[(x[:, 5:6] == torch.tensor(classes, device=x.device)).any(1)]
 
         # Check shapes
         n = x.shape[0]  # number of boxes
@@ -103,18 +94,11 @@ def process_outs(prediction, conf_thres=.25, iou_thres=.45, classes=None, agnost
         # Batched NMS
         c = x[:, 5:6] * (0 if agnostic else max_wh)  # classes
         boxes, scores = x[:, :4] + c, x[:, 4]  # boxes (offset by class), scores
-        i = nms(boxes, scores, iou_thres)  # NMS
-        if np.array(i).shape[0] > max_det:  # limit detections
+        i = torchvision.ops.nms(boxes, scores, iou_thres)  # NMS
+        if i.shape[0] > max_det:  # limit detections
             i = i[:max_det]
-        # if merge and (1 < n < 3E3):  # Merge NMS (boxes merged using weighted mean)
-        #     # update boxes as boxes(i,4) = weights(i,n) * boxes(n,4)
-        #     iou = box_iou(boxes[i], boxes) > iou_thres  # iou matrix
-        #     weights = iou * scores[None]  # box weights
-        #     x[i, :4] = torch.mm(weights, x[:, :4]).float() / weights.sum(1, keepdim=True)  # merged boxes
-        #     if redundant:
-        #         i = i[iou.sum(1) > 1]  # require redundancy
-        k = [x[u] for u in i]
-        output = np.array(k)
+
+        output[xi] = x[i]
         if (time.time() - t) > time_limit:
             print(f'WARNING: NMS time limit {time_limit}s exceeded')
             break  # time limit exceeded
@@ -123,7 +107,7 @@ def process_outs(prediction, conf_thres=.25, iou_thres=.45, classes=None, agnost
 
 def xywh2xyxy(x):
     # Convert nx4 boxes from [x, y, w, h] to [x1, y1, x2, y2] where xy1=top-left, xy2=bottom-right
-    y = np.copy(x)
+    y = x.clone() if isinstance(x, torch.Tensor) else np.copy(x)
     y[:, 0] = x[:, 0] - x[:, 2] / 2  # top left x
     y[:, 1] = x[:, 1] - x[:, 3] / 2  # top left y
     y[:, 2] = x[:, 0] + x[:, 2] / 2  # bottom right x
@@ -152,8 +136,15 @@ def scale_coords(img1_shape, coords, img0_shape, ratio_pad=None):
     return coords
 
 def clip_coords(boxes, shape):
-    boxes[:, [0, 2]] = boxes[:, [0, 2]].clip(0, shape[1])  # x1, x2
-    boxes[:, [1, 3]] = boxes[:, [1, 3]].clip(0, shape[0])  # y1, y2
+    # Clip bounding xyxy bounding boxes to image shape (height, width)
+    if isinstance(boxes, torch.Tensor):  # faster individually
+        boxes[:, 0].clamp_(0, shape[1])  # x1
+        boxes[:, 1].clamp_(0, shape[0])  # y1
+        boxes[:, 2].clamp_(0, shape[1])  # x2
+        boxes[:, 3].clamp_(0, shape[0])  # y2
+    else:  # np.array (faster grouped)
+        boxes[:, [0, 2]] = boxes[:, [0, 2]].clip(0, shape[1])  # x1, x2
+        boxes[:, [1, 3]] = boxes[:, [1, 3]].clip(0, shape[0])  # y1, y2
 
 def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True, stride=32):
     # Resize and pad image while meeting stride-multiple constraints
@@ -186,3 +177,4 @@ def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleF
     left, right = int(round(dw - 0.1)), int(round(dw + 0.1))
     im = cv2.copyMakeBorder(im, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)  # add border
     return im, ratio, (dw, dh)
+    # test
