@@ -148,7 +148,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
 
         # Save the video frame by frame
         time1 = datetime.datetime.now()
-        vout.write(image)
+        # vout.write(image)
         end1 = datetime.datetime.now()-time1
         print("IMAGE WRITE TIME: ", end1)
         total_write.append(end1)
