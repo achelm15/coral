@@ -120,6 +120,8 @@ def detect_video(video, interpreter, imgsz, data, conf):
     while True:
         print(count)
         res, frame = camera.read()
+        if not res:
+            break
         frame_start = datetime.datetime.now()
         if count%2!=-1:
             time1 = datetime.datetime.now()
@@ -144,8 +146,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
         #     continue
         frame_end = datetime.datetime.now()-frame_start
         frame_rate.append(frame_end)
-        if not res:
-            break
+        
         
 
         if cv2.waitKey(110) & 0xff == 27:
