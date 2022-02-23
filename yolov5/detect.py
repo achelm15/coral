@@ -72,8 +72,10 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     y = (y.astype(np.float32) - zero_point) * scale  # re-scale
     y[..., :4] *= [w, h, w, h]
     y = torch.tensor(y) if isinstance(y, np.ndarray) else y
+    time2 = datetime.datetime.now()
     pred = process_outs(y, conf_thres = conf)[0]
     pred[:, :4] = scale_coords(test_img.shape[1:3], pred[:, :4], test_img0.shape).round()
+    print("PROCESSING ", datetime.datetime.now()-time2)
     results = np.unique(pred[:,5], return_counts=True)
     results = ([(data[int(i)]+"s") for i in results[0]], results[1])
     result_s = "Found: "
@@ -86,9 +88,10 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
 
     print(result_s)
     print(time)
-
+    time3 = datetime.datetime.now()
     if pred[:,4] is not None:
         draw(test_img0, pred[:,:4], pred[:,4], pred[:,5].int(), data)
+    print("DRAWING: ",datetime.datetime.now()-time3)
 
     return test_img0, time
 
@@ -111,7 +114,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
         out = out[1][:len(out[1])-4]+".mp4"
     else:
         out = out[0][:len(out[0])-4]+".mp4"
-    vout.open("OutPut"+out, fourcc, 20, sz, True)
+    vout.open("OutPut"+out, fourcc, fps, sz, True)
     count = 0
     time_array = []
     total_det = []
@@ -121,27 +124,22 @@ def detect_video(video, interpreter, imgsz, data, conf):
         print(count)
         res, frame = camera.read()
         frame_start = datetime.datetime.now()
-        if count%2==0:
-            time1 = datetime.datetime.now()
-            image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False, conf)
-            end1 = datetime.datetime.now()-time1
-            print("TOTAL DETECTION: ", end1)
-            total_det.append(end1)
-            time_array.append(time)
-            count += 1
-            if show:
-                cv2.imshow("detection", image)
+        time1 = datetime.datetime.now()
+        image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False, conf)
+        end1 = datetime.datetime.now()-time1
+        print("TOTAL DETECTION: ", end1)
+        total_det.append(end1)
+        time_array.append(time)
+        count += 1
+        if show:
+            cv2.imshow("detection", image)
 
-            # Save the video frame by frame
-            time1 = datetime.datetime.now()
-            # vout.write(image)
-            end1 = datetime.datetime.now()-time1
-            print("IMAGE WRITE TIME: ", end1)
-            total_write.append(end1)
-        else:
-            # vout.write(np.array(frame))
-            count = count + 1
-            continue
+        # Save the video frame by frame
+        time1 = datetime.datetime.now()
+        # vout.write(image)
+        end1 = datetime.datetime.now()-time1
+        print("IMAGE WRITE TIME: ", end1)
+        total_write.append(end1)
         frame_end = datetime.datetime.now()-frame_start
         frame_rate.append(frame_end)
         if not res:
