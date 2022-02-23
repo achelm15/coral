@@ -104,7 +104,6 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
 
 
 def detect_video(video, interpreter, imgsz, data, conf):
-    print(io,"afsdfa;sjdlfkjas;dlkfja;sdlkfjas;dlkfja;sldkfja;sldkjf")
     camera = cv2.VideoCapture(video)
     show = platform == "darwin" or platform =="win32"
     fps = camera.get(cv2.CAP_PROP_FPS)
@@ -117,7 +116,10 @@ def detect_video(video, interpreter, imgsz, data, conf):
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
     vout = cv2.VideoWriter()
-    out = video.split('/')
+    if video==0:
+        out = "captureOutPut.mp4"
+    else:
+        out = video.split('/')
     if len(out)==2:
         out = out[1][:len(out[1])-4]+".mp4"
     else:
@@ -192,6 +194,9 @@ def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, dat
         cv2.imwrite(source[:len(source)-4]+"Output.jpg", new_image)
     elif source.endswith("m4v") or source.endswith("mp4"): 
         video = source
+        detect_video(video, interpreter, imgsz, data, conf)
+    elif source =='0':
+        video = 0
         detect_video(video, interpreter, imgsz, data, conf)
     else:
         return
