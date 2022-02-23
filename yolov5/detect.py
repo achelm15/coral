@@ -40,6 +40,7 @@ def draw(image, boxes, scores, classes, all_classes):
 
 
 def detect_image(image, interpreter, imgsz, data, pathname, conf):
+    time4 = datetime.datetime.now()
     if pathname:
         test_img0 = cv2.imread(pathname)
     else: 
@@ -60,6 +61,7 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     test_img = (test_img / scale + zero_point).astype(np.uint8)  # de-scale
     test_img = torch.from_numpy(test_img).to('cpu').permute(0,2,3,1).cpu().numpy()
     interpreter.set_tensor(input['index'], test_img)
+    print("SETUP: ",datetime.datetime.now()-time4)
 
 
     start = datetime.datetime.now()
