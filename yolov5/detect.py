@@ -27,7 +27,6 @@ def draw(image, boxes, scores, classes, all_classes):
         left = max(0, np.floor(y1 + 0.5).astype(int))
         right = max(0, np.floor(x2 + 0.5).astype(int))
         bottom = max(0, np.floor(y2 + 0.5).astype(int))
-
         cv2.rectangle(image, (top, left), (right, bottom), (255, 0, 0), 2)
         cv2.putText(image, '{0} {1:.2f}'.format(all_classes[int(cl)], score),
                     (top, left - 6),
@@ -51,6 +50,7 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     scale, zero_point = input['quantization']
     test_img = (test_img / scale + zero_point).astype(np.uint8)  # de-scale
     test_img = np.array([test_img]).transpose(0, 2, 3, 1)
+    # print(test_img.shape)
     interpreter.set_tensor(input['index'], test_img)
 
 
@@ -66,7 +66,6 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     y[..., 1] *= h  # y
     y[..., 2] *= w  # w
     y[..., 3] *= h  # h
-
 
     pred = process_outs(y, conf_thres = conf)
     pred[:, :4] = scale_coords(test_img.shape[1:3], pred[:, :4], test_img0.shape).round()
@@ -124,7 +123,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
         frame_start = datetime.datetime.now()
         if count%2==0:
             time1 = datetime.datetime.now()
-            image, time = detect_image(Image.fromarray(frame), interpreter, imgsz, data, False, conf)
+            image, time = detect_image(frame, interpreter, imgsz, data, False, conf)
             end1 = datetime.datetime.now()-time1
             print("TOTAL DETECTION: ", end1)
             total_det.append(end1)
@@ -187,6 +186,10 @@ def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, dat
     elif source.endswith("m4v") or source.endswith("mp4"): 
         video = source
         detect_video(video, interpreter, imgsz, data, conf)
+    elif source =='0':
+        video = 0
+        detect_video(video, interpreter, imgsz, data, conf)
+
     else:
         return
 
