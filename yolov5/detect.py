@@ -47,20 +47,21 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
         test_img0 = np.array(image)
     test_img = np.ascontiguousarray(letterbox(test_img0, imgsz, stride=64, auto=False)[0].transpose((2, 0, 1))[::-1])
     _, h, w = test_img.shape
-    test_img = test_img.astype(np.float32)
+    test_img = test_img.astype(np.float32)[None]
     test_img /= 255
     # device = torch.device('cpu')
     # test_img = torch.from_numpy(test_img).to(device)
     # test_img = test_img.float()  # uint8 to fp16/32
     # test_img /= 255  # 0 - 255 to 0.0 - 1.0
-    if len(test_img.shape) == 3:
-        test_img = test_img[None]  # expand for batch dim
-    b, ch, h, w = test_img.shape  # batch, channel, height, width
-    input, output = interpreter.get_input_details()[0], interpreter.get_output_details()[0]
-    scale, zero_point = input['quantization']
+    # if len(test_img.shape) == 3:
+    #     test_img = test_img[None]  # expand for batch dim
+    # b, ch, h, w = test_img.shape  # batch, channel, height, width
+    # input, output = interpreter.get_input_details()[0], interpreter.get_output_details()[0]
+    scale, zero_point = io[0]['quantization']
+    print(scale,zero_point)
     test_img = (test_img / scale + zero_point).astype(np.uint8)  # de-scale
     test_img = torch.from_numpy(test_img).to('cpu').permute(0,2,3,1).cpu().numpy()
-    interpreter.set_tensor(input['index'], test_img)
+    interpreter.set_tensor(io[0]['index'], test_img)
     print("SETUP: ",datetime.datetime.now()-time4)
 
 
@@ -69,15 +70,15 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
     time = datetime.datetime.now() - start
 
 
-    y = interpreter.get_tensor(output['index'])
-    scale, zero_point = output['quantization']
+    y = interpreter.get_tensor(io[1]['index'])
+    scale, zero_point = io[1]['quantization']
+    print(scale,zero_point)
     y = (y.astype(np.float32) - zero_point) * scale  # re-scale
     y[..., :4] *= [w, h, w, h]
     y = torch.tensor(y) if isinstance(y, np.ndarray) else y
     time2 = datetime.datetime.now()
     pred = process_outs(y, conf_thres = conf)[0]
     pred[:, :4] = scale_coords(test_img.shape[1:3], pred[:, :4], test_img0.shape).round()
-    print("PROCESSING ", datetime.datetime.now()-time2)
     results = np.unique(pred[:,5], return_counts=True)
     results = ([(data[int(i)]+"s") for i in results[0]], results[1])
     result_s = "Found: "
@@ -86,6 +87,7 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
             result_s+=str(int(results[1][x])) + " " + results[0][x] + ", "
         else:
             result_s+=str(int(results[1][x])) + " " + results[0][x]
+    print("PROCESSING ", datetime.datetime.now()-time2)
 
 
     print(result_s)
@@ -99,6 +101,7 @@ def detect_image(image, interpreter, imgsz, data, pathname, conf):
 
 
 def detect_video(video, interpreter, imgsz, data, conf):
+    print(io,"afsdfa;sjdlfkjas;dlkfja;sdlkfjas;dlkfja;sldkfja;sldkjf")
     camera = cv2.VideoCapture(video)
     show = platform == "darwin" or platform =="win32"
     fps = camera.get(cv2.CAP_PROP_FPS)
@@ -122,7 +125,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
     total_det = []
     total_write = []
     frame_rate = []
-    while True and count< 500:
+    while True and count< 20:
         print(count)
         res, frame = camera.read()
         frame_start = datetime.datetime.now()
@@ -174,7 +177,8 @@ def run(weights=ROOT / 'yolov5s.pt', source=ROOT / 'data/images', imgsz=256, dat
         import tensorflow as tf
         interpreter = tf.lite.Interpreter(model_path)
     interpreter.allocate_tensors()
-    
+    global io
+    io = interpreter.get_input_details()[0], interpreter.get_output_details()[0]
     if source.endswith("jpg") or source.endswith("jpeg"):
         image = Image.open(source)
         new_image, time = detect_image(image, interpreter, imgsz, data, source, conf)
