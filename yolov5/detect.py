@@ -130,7 +130,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
     total_det = []
     total_write = []
     frame_rate = []
-    while True:
+    while True and count < 400:
         print(count)
         res, frame = camera.read()
         if not res:
