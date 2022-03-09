@@ -34,8 +34,8 @@ from pycoral.utils.edgetpu import make_interpreter
 from pycoral.utils.edgetpu import run_inference
 
 def main():
-    default_model_dir = 'coral/Coral_Files/tflite/'
-    default_model = 'effDet0_LPCV_edgetpu.tflite'
+    default_model_dir = 'coral-1/effDet/'
+    default_model = 'effDet1_balanced250_edgetpu.tflite'
     default_labels = 'LPCV_labels.txt'
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', help='.tflite model path',
