@@ -117,8 +117,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
     total_det = []
     total_write = []
     frame_rate = []
-    while True and count < 400:
-        print(count)
+    while True:
         res, frame = camera.read()
         if not res:
             break
@@ -136,14 +135,13 @@ def detect_video(video, interpreter, imgsz, data, conf):
 
             # Save the video frame by frame
             time1 = datetime.datetime.now()
-            # vout.write(image)
+            vout.write(image)
             end1 = datetime.datetime.now()-time1
             print("IMAGE WRITE TIME: ", end1)
             total_write.append(end1)
-        # else:
-        #     # vout.write(np.array(frame))
-        #     count = count + 1
-        #     continue
+        else:
+            vout.write(np.array(frame))
+            continue
         frame_end = datetime.datetime.now()-frame_start
         frame_rate.append(frame_end)
         
