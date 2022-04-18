@@ -133,6 +133,5 @@ dmypy.json
 *.mp4
 *.m4v
 *.png
-*.tflite
 .DS_Store
 *.pt
