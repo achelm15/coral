@@ -113,38 +113,38 @@ def detect_video(video, interpreter, imgsz, data, conf):
     else:
         out = out[0][:len(out[0])-4]+".mp4"
     #Frame rate should be changed to match video
-    vout.open("output_"+out, fourcc, 60, sz, True)
+    vout.open("output_"+out, fourcc, 30, sz, True)
     count = 0
     time_array = []
     total_det = []
     total_write = []
     frame_rate = []
     while True and count < 200:
-        print(count)
+        # print(count)
         res, frame = camera.read()
         if not res:
             break
         frame_start = datetime.datetime.now()
-        if count%2!=-1:
-            time1 = datetime.datetime.now()
-            image, time = detect_image(frame, interpreter, imgsz, data, False, conf)
-            end1 = datetime.datetime.now()-time1
-            print("TOTAL DETECTION: ", end1)
-            total_det.append(end1)
-            time_array.append(time)
-            count += 1
-            if show:
-                cv2.imshow("detection", image)
+        # if count%2!=-1:
+        time1 = datetime.datetime.now()
+        image, time = detect_image(frame, interpreter, imgsz, data, False, conf)
+        end1 = datetime.datetime.now()-time1
+        print("TOTAL DETECTION: ", end1)
+        total_det.append(end1)
+        time_array.append(time)
+        count += 1
+        if show:
+            cv2.imshow("detection", image)
 
-            # Save the video frame by frame
-            time1 = datetime.datetime.now()
-            # vout.write(image)
-            end1 = datetime.datetime.now()-time1
-            print("IMAGE WRITE TIME: ", end1)
-            total_write.append(end1)
-        else:
+        # Save the video frame by frame
+        time1 = datetime.datetime.now()
+        # vout.write(image)
+        end1 = datetime.datetime.now()-time1
+        print("IMAGE WRITE TIME: ", end1)
+        total_write.append(end1)
+        # else:
             # vout.write(np.array(frame))
-            continue
+            # continue
         frame_end = datetime.datetime.now()-frame_start
         frame_rate.append(frame_end)
         
