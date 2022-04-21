@@ -106,14 +106,14 @@ def detect_video(video, interpreter, imgsz, data, conf):
         int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT)))
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
-    vout = cv2.VideoWriter()
+    # vout = cv2.VideoWriter()
     out = video.split('/')
     if len(out)==2:
         out = out[1][:len(out[1])-4]+".mp4"
     else:
         out = out[0][:len(out[0])-4]+".mp4"
     #Frame rate should be changed to match video
-    vout.open("output_"+out, fourcc, fps, sz, True)
+    # vout.open("output_"+out, fourcc, fps, sz, True)
     count = 0
     time_array = []
     total_det = []
