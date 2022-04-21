@@ -113,7 +113,7 @@ def detect_video(video, interpreter, imgsz, data, conf):
     else:
         out = out[0][:len(out[0])-4]+".mp4"
     #Frame rate should be changed to match video
-    vout.open("output_"+out, fourcc, 30, sz, True)
+    vout.open("output_"+out, fourcc, fps, sz, True)
     count = 0
     time_array = []
     total_det = []
