@@ -11,8 +11,9 @@ To run on Coral:
    - CONFIDENCE_PARAMETER - a decimal number that the model should be as confident that an object is in a location, typically anywhere from 0.25 to 0.6
 
 
-The yaml file should contain the same list as found in the yaml file used to train the model
+- The yaml file should contain the same list as found in the yaml file used to train the model
 
-The current detect.py uses NumPy arrays, however a different version exists in a branch entitled "torch" which uses torch tensors. This may work faster on the Raspberry Pi with Coral accelerator.
+- The current detect.py uses NumPy arrays, however a different version exists in a branch entitled "torch" which uses torch tensors. This may work faster on the Raspberry Pi with Coral accelerator.
+- The current detect.py may appear slow, however that is due only to OpenCV. If you remove the write or imshow statements, the script will run much faster. Print statements exist to demonstrate which parts of the code are taking a long or short time.
 
-general.py contains auxilary function necessary for detect.py to work properly.
+- general.py contains auxilary function necessary for detect.py to work properly.
